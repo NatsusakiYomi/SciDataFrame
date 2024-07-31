@@ -1,0 +1,20 @@
+https://download.scidb.cn/download?fileId=846e78f2763ca8da978efb2b4dd06b67&path=/V1/数据集/SEM试验结果/磷石膏/磷石膏 (8).tif&fileName=%E7%A3%B7%E7%9F%B3%E8%86%8F%20(8).tif
+https://download.scidb.cn/download?fileId=9cdc9723cecdcc267ffc7c6b1ba654ef&path=/V1/数据集/SEM试验结果/磷石膏/磷石膏 (9).tif&fileName=%E7%A3%B7%E7%9F%B3%E8%86%8F%20(9).tif
+https://download.scidb.cn/download?fileId=460e3420400e0413c56ce9d42dbe9abd&path=/V1/数据集/SEM试验结果/粉土/粉土 (1).tif&fileName=%E7%B2%89%E5%9C%9F%20(1).tif
+https://download.scidb.cn/download?fileId=b4b8b422cd5b5529fa553e8891d691be&path=/V1/数据集/SEM试验结果/粉土/粉土 (2).tif&fileName=%E7%B2%89%E5%9C%9F%20(2).tif
+https://download.scidb.cn/download?fileId=a6d816744253e93adfe5e9181221d552&path=/V1/数据集/SEM试验结果/粉土/粉土 (3).tif&fileName=%E7%B2%89%E5%9C%9F%20(3).tif
+https://download.scidb.cn/download?fileId=655a8585d0b05a74819f8e9e794623a0&path=/V1/数据集/SEM试验结果/粉土/粉土 (4).tif&fileName=%E7%B2%89%E5%9C%9F%20(4).tif
+https://download.scidb.cn/download?fileId=8541ba102c72a2d933a808e3a4d58815&path=/V1/数据集/SEM试验结果/粉土/粉土 (5).tif&fileName=%E7%B2%89%E5%9C%9F%20(5).tif
+https://download.scidb.cn/download?fileId=07f0d976e3de0e54e3a5b96a3b2ddd13&path=/V1/数据集/SEM试验结果/粉土/粉土 (6).tif&fileName=%E7%B2%89%E5%9C%9F%20(6).tif
+https://download.scidb.cn/download?fileId=fdca5af2175ae9fc94720e9eb3ca8cf8&path=/V1/数据集/SEM试验结果/粉土/粉土 (7).tif&fileName=%E7%B2%89%E5%9C%9F%20(7).tif
+https://download.scidb.cn/download?fileId=99e9215e4cbe2f662aca0f14c99879f7&path=/V1/数据集/SEM试验结果/粉土/粉土 (8).tif&fileName=%E7%B2%89%E5%9C%9F%20(8).tif
+https://download.scidb.cn/download?fileId=14417e4fdc7685427d8477257dccb5ca&path=/V1/数据集/SEM试验结果/纤维+胶凝材料/1-0003571.tif&fileName=1-0003571.tif
+https://download.scidb.cn/download?fileId=75e091357220e5b6a8c867f266821dde&path=/V1/数据集/SEM试验结果/纤维+胶凝材料/1-0003572.tif&fileName=1-0003572.tif
+https://download.scidb.cn/download?fileId=af59d0fa3295b4787dddb60183f658c3&path=/V1/数据集/SEM试验结果/纤维+胶凝材料/1-0003573.tif&fileName=1-0003573.tif
+https://download.scidb.cn/download?fileId=5fd02773e37b433f4b3d06733af83c1c&path=/V1/数据集/SEM试验结果/纤维+胶凝材料/1-0003574.tif&fileName=1-0003574.tif
+https://download.scidb.cn/download?fileId=22cfabd46850b6e072b570266a888a48&path=/V1/数据集/SEM试验结果/纤维+胶凝材料/1-0003575.tif&fileName=1-0003575.tif
+https://download.scidb.cn/download?fileId=d4ed9c07a0e294dcf8e202a3c2bf0d05&path=/V1/数据集/XRD/原始数据/山东农业大学赤泥.txt&fileName=%E5%B1%B1%E4%B8%9C%E5%86%9C%E4%B8%9A%E5%A4%A7%E5%AD%A6%E8%B5%A4%E6%B3%A5.txt
+https://download.scidb.cn/download?fileId=24244dcacf7e0de8e75362df58f7f413&path=/V1/数据集/XRD/原始数据/山东农大磷石膏.txt&fileName=%E5%B1%B1%E4%B8%9C%E5%86%9C%E5%A4%A7%E7%A3%B7%E7%9F%B3%E8%86%8F.txt
+https://download.scidb.cn/download?fileId=ecf569b030623e4ede92937562ad9f61&path=/V1/数据集/XRD/原始数据/山东农大粉土.txt&fileName=%E5%B1%B1%E4%B8%9C%E5%86%9C%E5%A4%A7%E7%B2%89%E5%9C%9F.txt
+https://download.scidb.cn/download?fileId=a87e0bf6302c835dc27749a3e72b656d&path=/V1/数据集/核磁共振NMR/试验图像/Graph1.png&fileName=Graph1.png
+https://download.scidb.cn/download?fileId=2083168c7917149c5e9b8a2dff013337&path=/V1/数据集/核磁共振NMR/试验图像/孔隙率变化.png&fileName=%E5%AD%94%E9%9A%99%E7%8E%87%E5%8F%98%E5%8C%96.png
