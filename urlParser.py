@@ -1,19 +1,22 @@
 import os
 from urllib.parse import quote
 
-API_KEY='&api_key=bfd4d663cbf0e5042b9f26fcfb29d71a'
+API_KEY = '&api_key=bfd4d663cbf0e5042b9f26fcfb29d71a'
+
 
 def url_parser(url_lists):
     file_structure = {}
     splits = {}
-    clean_urls=[]
-    file_extensions=[]
+    clean_urls = []
+    file_extensions = []
     for url in url_lists:
         clean_url = url.strip()
         file_extension = os.path.splitext(clean_url)[1][1:].lower()
         clean_url += API_KEY
         clean_url = quote(clean_url, safe='/:=&?#+!,')
         parts = clean_url.strip().split('&')
+
+        # TODO: 没有对应部分时抛出异常
         filepath_part = next(part for part in parts if part.startswith('path='))
         filename_part = next(part for part in parts if part.startswith('fileName='))
 
@@ -24,7 +27,7 @@ def url_parser(url_lists):
 
         split = os.path.join(*dirs[:-1])
         if split not in splits:
-            splits[split]=[]
+            splits[split] = []
         splits[split].append(clean_url)
 
         current_level = file_structure
@@ -34,9 +37,9 @@ def url_parser(url_lists):
             current_level = current_level[dir]
         current_level[dirs[-1]] = None
 
-
         clean_urls.append(clean_url)
         file_extensions.append(file_extension)
 
-    return clean_urls,file_extensions,splits,file_structure
+        # TODO: 返回该数据集所有的扩展名类型
 
+    return {'urls':clean_urls, 'exts':file_extensions}, splits, file_structure
