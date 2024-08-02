@@ -11,13 +11,16 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
+# TODO: Address all TODOs and remove all explanatory comments
 """TODO: Add a description here."""
+
 
 import csv
 import json
 import os
 from PIL import Image
 import datasets
+
 
 # TODO: Add BibTeX citation
 # Find for instance the citation on arxiv or on the dataset repo/website
@@ -42,8 +45,19 @@ _HOMEPAGE = ""
 # TODO: Add the licence for the dataset here if you can find it
 _LICENSE = ""
 
+# TODO: Add link to the official dataset URLs here
+# The HuggingFace Datasets library doesn't host the datasets but only points to the original files.
+# This can be an arbitrary nested dict/list of URLs (see below in `_split_generators` method)
+# _URLS = {
+#     "first_domain": ['https://download.scidb.cn/download?fileId=846e78f2763ca8da978efb2b4dd06b67&path=/V1/数据集/SEM试验结果/磷石膏/磷石膏 (8).tif&fileName=%E7%A3%B7%E7%9F%B3%E8%86%8F%20(8).tif',
+#                     'https://download.scidb.cn/download?fileId=e9f7757114cec9801274ff997d4c4f76&path=/V2/DHB-G-166_1.81um_tiff/20240118_ljz_GHB-G-6_1.81um_recon_Export0001.tiff&fileName=20240118_ljz_GHB-G-6_1.81um_recon_Export0001.tiff',
+#                      'https://download.scidb.cn/download?fileId=aec49141149b35cd784ab86973880454&path=/V2/DHB-G-166_1.81um_tiff/20240118_ljz_GHB-G-6_1.81um_recon_Export0004.tiff&fileName=20240118_ljz_GHB-G-6_1.81um_recon_Export0004.tiff'],
+#     "second_domain": ['https://download.scidb.cn/download?fileId=aec49141149b35cd784ab86973880454&path=/V2/DHB-G-166_1.81um_tiff/20240118_ljz_GHB-G-6_1.81um_recon_Export0004.tiff&fileName=20240118_ljz_GHB-G-6_1.81um_recon_Export0004.tiff'],
+# }
+
 def get_file_extension(url):
     return os.path.splitext(url)[1][1:].lower()
+
 
 
 # TODO: Name of the dataset usually matches the script name with CamelCase instead of snake_case
@@ -69,16 +83,20 @@ class NewDataset(datasets.GeneratorBasedBuilder):
     # ]
     #
     # DEFAULT_CONFIG_NAME = "first_domain"  # It's not mandatory to have a default configuration. Just use one if it make sense.
-    features = None
+    features=None
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
 
+        # 根据文件名设置特征和文件扩展名
+        # url = self.config.data_files
+        # self.file_extension = os.path.splitext(url)[1][1:].lower()
         self.features = datasets.Features({
-            "text": datasets.Value("string"),
+            "text": datasets.Value(dtype="string"),
             "image": datasets.Image(),
             "binary": datasets.Value("binary")
         })
+
 
     def _info(self):
         # TODO: This method specifies the datasets.DatasetInfo object which contains informations and typings for the dataset
@@ -94,8 +112,7 @@ class NewDataset(datasets.GeneratorBasedBuilder):
             # This is the description that will appear on the datasets page.
             description=_DESCRIPTION,
             # This defines the different columns of the dataset and their types
-            features=self.features,
-            # Here we define them above because they are different between the two configurations
+            features=self.features,  # Here we define them above because they are different between the two configurations
 
             # If there's a common (input, target) tuple from the features, uncomment supervised_keys line below and
             # specify them. They'll be used if as_supervised=True in builder.as_dataset.
@@ -111,13 +128,19 @@ class NewDataset(datasets.GeneratorBasedBuilder):
     def _split_generators(self, dl_manager):
         # TODO: This method is tasked with downloading/extracting the data and defining the splits depending on the configuration
         # If several configurations are possible (listed in BUILDER_CONFIGS), the configuration selected by the user is in self.config.name
-        urls = self.config.data_files['urls']
+        urls=self.config.data_files['train']
+        # urls=dic[:len(dic)//2]
+        # exts=dic[len(dic)//2:]
+        # print(dic)
+        # print(exts)
+
+        # download_config = datasets.DownloadConfig(num_proc=1, max_retries=5)
         downloaded_files = dl_manager.download_and_extract(urls)
-        file2ext = dict(zip(downloaded_files, self.config.data_files['exts']))
+        file2ext=dict(zip(downloaded_files, self.config.data_dir))
         # dl_manager is a datasets.download.DownloadManager that can be used to download and extract URLS
         # It can accept any type or nested list/dict and will give back the same structure with the url replaced with path to local files.
         # By default the archives will be extracted and a path to a cached folder where they are extracted is returned instead of the archive
-        # print('logging:', urls)
+        print('logging:',urls)
         return [
             datasets.SplitGenerator(
                 name='allofdata',
@@ -132,49 +155,56 @@ class NewDataset(datasets.GeneratorBasedBuilder):
     def _generate_examples(self, file2ext):
         # TODO: This method handles input defined in _split_generators to yield (key, example) tuples from the dataset.
         # The `key` is for legacy reasons (tfds) and is not important in itself, but must be unique for each example.
-
-        id_ = 0
-        for (file_path, file_ext) in file2ext.items():
-            if file_ext in ['txt', 'json', 'csv']:
-                with open(file_path, 'r', encoding='utf-8') as f:
-                    print(file_path)
-                    print(f)
-                    for line in f.readlines():
-                        clean_line = line.strip()
-                        id_ += 1
-                        yield id_, {"text": clean_line,
+        #     print(f"Processing image from URL: {urls}")
+            # print(images)
+            id_=0
+            for (file_path, file_ext) in file2ext.items():
+                if file_ext in ['txt', 'json', 'csv']:
+                    with open(file_path,'r',encoding='utf-8') as f:
+                        print(file_path)
+                        print(f)
+                        document = f.read().strip().split('\n')
+                        id_+=1
+                        yield id_, {"text": document,
                                     "image": None,
                                     "binary": None}
-            elif file_ext in ['tif', 'png', 'jpg']:
-                print(file_path)
-                with Image.open(file_path, 'r') as img:
-                    print(img)
-                    id_ += 1
-                    yield id_, {"text": None,
-                                "image": img,
-                                "binary": None}
-            else:
-                try:
-                    with open(file_path, 'rb') as f:
-                        print(f)
-                        binary_data = f.read()
-                        id_ += 1
+                elif file_ext in ['tif', 'png', 'jpg']:
+                    print(file_path)
+                    with Image.open(file_path,'r') as img:
+                        print(img)
+                        id_+=1
                         yield id_, {"text": None,
-                                    "image": None,
-                                    "binary": binary_data}
-                except PermissionError as e:
-                    print(f"Permission error: {e}")
+                                    "image": img,
+                                    "binary": None}
+                else:
+                    try:
+                        with open(file_path, 'rb') as f:
+                            print(f)
+                            binary_data = f.read()
+                            id_+=1
+                            yield id_, {"text": None,
+                                        "image": None,
+                                        "binary": binary_data}
+                    except PermissionError as e:
+                        print(f"Permission error: {e}")
 
+            # for file_obj in images:
+            #     yield {
+            #         "image": file_obj,
+            #     }
 def main():
-    """调试"""
-
     from datasets import load_dataset
-    builder = NewDataset(split='allofdata')
+    # 直接在脚本内调试
+    builder = NewDataset(config_name='second_domain')
     dl_manager = datasets.DownloadManager()
     split_generators = builder._split_generators(dl_manager)
     for split_generator in split_generators:
         for example in builder._generate_examples(**split_generator.gen_kwargs):
             print(example)
+            # example["image"]
+
+# import datasets
+# datasets.builder('NewDataset', NewDataset)
 
 if __name__ == "__main__":
     main()
