@@ -129,10 +129,6 @@ class NewDataset(datasets.GeneratorBasedBuilder):
         # TODO: This method is tasked with downloading/extracting the data and defining the splits depending on the configuration
         # If several configurations are possible (listed in BUILDER_CONFIGS), the configuration selected by the user is in self.config.name
         urls=self.config.data_files['train']
-        # urls=dic[:len(dic)//2]
-        # exts=dic[len(dic)//2:]
-        # print(dic)
-        # print(exts)
 
         # download_config = datasets.DownloadConfig(num_proc=1, max_retries=5)
         downloaded_files = dl_manager.download_and_extract(urls)
@@ -140,7 +136,7 @@ class NewDataset(datasets.GeneratorBasedBuilder):
         # dl_manager is a datasets.download.DownloadManager that can be used to download and extract URLS
         # It can accept any type or nested list/dict and will give back the same structure with the url replaced with path to local files.
         # By default the archives will be extracted and a path to a cached folder where they are extracted is returned instead of the archive
-        print('logging:',urls)
+        # print('logging:',urls)
         return [
             datasets.SplitGenerator(
                 name='allofdata',
@@ -161,50 +157,47 @@ class NewDataset(datasets.GeneratorBasedBuilder):
             for (file_path, file_ext) in file2ext.items():
                 if file_ext in ['txt', 'json', 'csv']:
                     with open(file_path,'r',encoding='utf-8') as f:
-                        print(file_path)
-                        print(f)
+                        # print(file_path)
+                        # print(f)
                         document = f.read().strip().split('\n')
                         id_+=1
                         yield id_, {"text": document,
                                     "image": None,
                                     "binary": None}
                 elif file_ext in ['tif', 'png', 'jpg']:
-                    print(file_path)
+                    # print(file_path)
                     with Image.open(file_path,'r') as img:
-                        print(img)
+                        # print(img)
                         id_+=1
                         yield id_, {"text": None,
                                     "image": img,
                                     "binary": None}
                 else:
+                    id_ += 1
                     try:
                         with open(file_path, 'rb') as f:
-                            print(f)
+                            # print(f)
                             binary_data = f.read()
-                            id_+=1
+
                             yield id_, {"text": None,
                                         "image": None,
                                         "binary": binary_data}
                     except PermissionError as e:
-                        print(f"Permission error: {e}")
+                        pass
+                        # print(f"Warning: Permission error : {e}")
 
             # for file_obj in images:
             #     yield {
             #         "image": file_obj,
             #     }
 def main():
-    from datasets import load_dataset
-    # 直接在脚本内调试
+    # 脚本内调试
     builder = NewDataset(config_name='second_domain')
     dl_manager = datasets.DownloadManager()
     split_generators = builder._split_generators(dl_manager)
     for split_generator in split_generators:
         for example in builder._generate_examples(**split_generator.gen_kwargs):
             print(example)
-            # example["image"]
-
-# import datasets
-# datasets.builder('NewDataset', NewDataset)
 
 if __name__ == "__main__":
     main()
