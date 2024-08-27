@@ -48,16 +48,22 @@ _LICENSE = ""
 # TODO: Add link to the official dataset URLs here
 # The HuggingFace Datasets library doesn't host the datasets but only points to the original files.
 # This can be an arbitrary nested dict/list of URLs (see below in `_split_generators` method)
-# _URLS = {
-#     "first_domain": ['https://download.scidb.cn/download?fileId=846e78f2763ca8da978efb2b4dd06b67&path=/V1/数据集/SEM试验结果/磷石膏/磷石膏 (8).tif&fileName=%E7%A3%B7%E7%9F%B3%E8%86%8F%20(8).tif',
-#                     'https://download.scidb.cn/download?fileId=e9f7757114cec9801274ff997d4c4f76&path=/V2/DHB-G-166_1.81um_tiff/20240118_ljz_GHB-G-6_1.81um_recon_Export0001.tiff&fileName=20240118_ljz_GHB-G-6_1.81um_recon_Export0001.tiff',
-#                      'https://download.scidb.cn/download?fileId=aec49141149b35cd784ab86973880454&path=/V2/DHB-G-166_1.81um_tiff/20240118_ljz_GHB-G-6_1.81um_recon_Export0004.tiff&fileName=20240118_ljz_GHB-G-6_1.81um_recon_Export0004.tiff'],
-#     "second_domain": ['https://download.scidb.cn/download?fileId=aec49141149b35cd784ab86973880454&path=/V2/DHB-G-166_1.81um_tiff/20240118_ljz_GHB-G-6_1.81um_recon_Export0004.tiff&fileName=20240118_ljz_GHB-G-6_1.81um_recon_Export0004.tiff'],
-# }
+_URLS = {
+    "first_domain": ['https://download.scidb.cn/download?fileId=846e78f2763ca8da978efb2b4dd06b67&path=/V1/数据集/SEM试验结果/磷石膏/磷石膏 (8).tif&fileName=%E7%A3%B7%E7%9F%B3%E8%86%8F%20(8).tif',
+                    'https://download.scidb.cn/download?fileId=e9f7757114cec9801274ff997d4c4f76&path=/V2/DHB-G-166_1.81um_tiff/20240118_ljz_GHB-G-6_1.81um_recon_Export0001.tiff&fileName=20240118_ljz_GHB-G-6_1.81um_recon_Export0001.tiff',
+                     'https://download.scidb.cn/download?fileId=aec49141149b35cd784ab86973880454&path=/V2/DHB-G-166_1.81um_tiff/20240118_ljz_GHB-G-6_1.81um_recon_Export0004.tiff&fileName=20240118_ljz_GHB-G-6_1.81um_recon_Export0004.tiff'],
+    "second_domain": ['https://download.scidb.cn/download?fileId=59048d97a0e868ccad0c4e10bb470fb1&path=/V1/数据集/XRD/原始数据/原材料.doc&fileName=%E5%8E%9F%E6%9D%90%E6%96%99.doc'],
+}
 
 def get_file_extension(url):
     return os.path.splitext(url)[1][1:].lower()
 
+def is_text_format(ext):
+    return ext in ['txt', 'json', 'csv']
+
+def is_pil_format(ext):
+    ext = ext.lower() if ext.startswith('.') else f'.{ext.lower()}'
+    return ext in Image.registered_extensions()
 
 
 # TODO: Name of the dataset usually matches the script name with CamelCase instead of snake_case
@@ -77,17 +83,19 @@ class NewDataset(datasets.GeneratorBasedBuilder):
     # You will be able to load one or the other configurations in the following list with
     # data = datasets.load_dataset('my_dataset', 'first_domain')
     # data = datasets.load_dataset('my_dataset', 'second_domain')
-    # BUILDER_CONFIGS = [
-    #     datasets.BuilderConfig(name="first_domain", version=VERSION, description="This part of my dataset covers a first domain"),
-    #     datasets.BuilderConfig(name="second_domain", version=VERSION, description="This part of my dataset covers a second domain"),
-    # ]
-    #
-    # DEFAULT_CONFIG_NAME = "first_domain"  # It's not mandatory to have a default configuration. Just use one if it make sense.
+    BUILDER_CONFIGS = [
+        datasets.BuilderConfig(name="first_domain", version=VERSION, description="This part of my dataset covers a first domain"),
+        datasets.BuilderConfig(name="second_domain", version=VERSION, description="This part of my dataset covers a second domain"),
+    ]
+
+    DEFAULT_CONFIG_NAME = "first_domain"  # It's not mandatory to have a default configuration. Just use one if it make sense.
     features=None
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
-
+        if 'datafiles' in kwargs and 'datadir' in kwargs:
+            self.config.data_files=kwargs['datafiles']
+            self.config.data_dir=kwargs['datadir']
         # 根据文件名设置特征和文件扩展名
         # url = self.config.data_files
         # self.file_extension = os.path.splitext(url)[1][1:].lower()
@@ -131,7 +139,7 @@ class NewDataset(datasets.GeneratorBasedBuilder):
         urls=self.config.data_files['train']
 
         # download_config = datasets.DownloadConfig(num_proc=1, max_retries=5)
-        downloaded_files = dl_manager.download_and_extract(urls)
+        downloaded_files = dl_manager.download(urls)
         file2ext=dict(zip(downloaded_files, self.config.data_dir))
         # dl_manager is a datasets.download.DownloadManager that can be used to download and extract URLS
         # It can accept any type or nested list/dict and will give back the same structure with the url replaced with path to local files.
@@ -155,19 +163,20 @@ class NewDataset(datasets.GeneratorBasedBuilder):
             # print(images)
             id_=0
             for (file_path, file_ext) in file2ext.items():
-                if file_ext in ['txt', 'json', 'csv']:
+                if is_text_format(file_ext):
                     with open(file_path,'r',encoding='utf-8') as f:
                         # print(file_path)
                         # print(f)
                         document = f.read().strip().split('\n')
+                        # print(document)
                         id_+=1
                         yield id_, {"text": document,
                                     "image": None,
                                     "binary": None}
-                elif file_ext in ['tif', 'png', 'jpg']:
+                elif is_pil_format(file_ext):
                     # print(file_path)
                     with Image.open(file_path,'r') as img:
-                        # print(img)
+                        print(img)
                         id_+=1
                         yield id_, {"text": None,
                                     "image": img,
@@ -178,7 +187,6 @@ class NewDataset(datasets.GeneratorBasedBuilder):
                         with open(file_path, 'rb') as f:
                             # print(f)
                             binary_data = f.read()
-
                             yield id_, {"text": None,
                                         "image": None,
                                         "binary": binary_data}
@@ -192,7 +200,7 @@ class NewDataset(datasets.GeneratorBasedBuilder):
             #     }
 def main():
     # 脚本内调试
-    builder = NewDataset(config_name='second_domain')
+    builder = NewDataset(config_name='second_domain',data_files=_URLS['first_domain'],data_dir=['tif','tif','tif'])
     dl_manager = datasets.DownloadManager()
     split_generators = builder._split_generators(dl_manager)
     for split_generator in split_generators:

@@ -1,0 +1,2 @@
+https://download.scidb.cn/download?fileId=0ca2521128499fb1955e9ad26e2786b0&path=/V1/2024-YG-07-数据集.zip&fileName=2024-YG-07-%E6%95%B0%E6%8D%AE%E9%9B%86.zip
+https://download.scidb.cn/download?fileId=a3ad15f9cb491bf43885a8b6af432b43&path=/V1/2024-YG-07-数据集清单.xlsx&fileName=2024-YG-07-%E6%95%B0%E6%8D%AE%E9%9B%86%E6%B8%85%E5%8D%95.xlsx

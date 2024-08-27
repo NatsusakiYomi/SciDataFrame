@@ -1,0 +1,2 @@
+https://download.scidb.cn/download?fileId=3086a894379c9de4aebd0d9b36fe59bf&path=/V1/Data/Powder_images.zip&fileName=Powder_images.zip
+https://download.scidb.cn/download?fileId=53416a702d2f693f25145d42360833ce&path=/V1/Data/Structures.zip&fileName=Structures.zip
