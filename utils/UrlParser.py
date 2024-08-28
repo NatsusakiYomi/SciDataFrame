@@ -47,7 +47,7 @@ def filter_url_from_index(directory_structure, target_dir):
 
     def recursive_search(current_dir, current_structure):
         # 如果当前文件夹是目标文件夹
-        if current_dir == target_dir:
+        if current_dir in target_dir:
             collect_urls(current_structure)
 
         # 如果当前结构是字典，继续递归
@@ -66,6 +66,9 @@ def filter_url_from_index(directory_structure, target_dir):
                 elif isinstance(value, dict):
                     # 继续递归收集子文件夹中的URL
                     collect_urls(value)
+        elif isinstance(structure, tuple):
+            all_urls.append(structure[0])
+            all_exts.append(structure[1])
 
     # 从顶层开始递归搜索
     for root_dir, root_structure in directory_structure.items():

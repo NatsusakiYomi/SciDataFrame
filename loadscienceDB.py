@@ -33,8 +33,7 @@ def load_sciencedb(txt):
     if REMOTE:
         dir_structure = read_url_from_txt(path=txt)
         print_directory_tree(dir_structure)
-        target_dir = input("请输入要下载的文件夹名称: ")
-        # TODO:下载指定文件，给出文件夹前三个文件
+        target_dir = input("请输入要下载的文件或者文件夹名称，以逗号分隔: ").split(',')
         urls_all,file_extensions=filter_url_from_index(dir_structure,target_dir)
         if OPTION == 'ALL':
             ds = load_dataset(LOCAL_SCRIPT_PATH, cache_dir=CACHE_DIR, num_proc=5, data_files=urls_all,
@@ -55,7 +54,7 @@ if __name__ == '__main__':
 
     PATH = 'c0bd7f5c79a24e48849432629f59639f.txt'
     PATH = 'e416c488169f484485ad7575dcfc43ce.txt'
-    PATH = "new.txt"
-
-    PATH = 'b6a1d3f42b014fa9ae9cce04679a5e0f.txt'
-    load_sciencedb(txt=PATH)
+    # PATH = "new.txt"
+    #
+    # PATH = 'b6a1d3f42b014fa9ae9cce04679a5e0f.txt'
+    print(load_sciencedb(txt=PATH))

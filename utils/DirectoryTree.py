@@ -9,10 +9,16 @@ def print_directory_tree(directory, indent=0):
     directory (dict): 表示文件目录的字典
     indent (int): 当前缩进级别
     """
+    file_count = 0
     for key, value in directory.items():
         # 打印当前文件夹或文件，前面加上适当数量的缩进
-        if directory[key] is None:
-            continue
+        if isinstance(value, tuple):
+            file_count += 1
+            if file_count == 4:
+                print(' ' * indent + '...')
+                continue
+            elif file_count > 4:
+                continue
         print(' ' * indent + str(key))
 
         # 如果 value 是字典，则递归调用 print_directory_tree
