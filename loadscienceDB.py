@@ -1,12 +1,13 @@
-from datasets import load_dataset
+from datasets import load_dataset,dataset_dict
 from utils import url_parser,filter_url_from_index
 from utils import print_directory_tree
+from utils import DataOperator
 import os
 import time
 
 
 
-os.environ["HF_DATA SETS_NUM_THREADS"] = "1"
+os.environ["HF_DATA SETS_NUM_THREADS"] = "5"
 URL_TXT_ROOT = r'./urls'
 # 修改端口号
 os.environ['HTTP_PROXY'] = 'http://127.0.0.1:7890'
@@ -27,6 +28,15 @@ def read_url_from_txt(path):
         URL_LIST=url_lists
         return url_parser(url_lists)
 
+def preprocess_dataset(dataset_dict: dataset_dict):
+    data_operator=DataOperator(dataset_dict)
+    print(data_operator.get_dataset())
+    print(data_operator.split_dataset(0.2))
+    print(data_operator.filter_dataset((lambda example: example["text"] is not None and isinstance(example["text"], str) and len(example["text"]) > 100)))
+    print(data_operator.select_dataset([0,1,2]))
+    print(data_operator.unique_dataset('text'))
+    print(data_operator.sort_dataset('text'))
+    print(data_operator.flat_dataset())
 
 
 def load_sciencedb(txt):
@@ -36,25 +46,34 @@ def load_sciencedb(txt):
         target_dir = input("请输入要下载的文件或者文件夹名称，以逗号分隔: ").split(',')
         urls_all,file_extensions=filter_url_from_index(dir_structure,target_dir)
         if OPTION == 'ALL':
-            ds = load_dataset(LOCAL_SCRIPT_PATH, cache_dir=CACHE_DIR, num_proc=5, data_files=urls_all,
+            ds = load_dataset(LOCAL_SCRIPT_PATH, cache_dir=CACHE_DIR, data_files=urls_all,
                               data_dir=file_extensions)
     else:
         ds = load_dataset(LOCAL_FILE_PATH, cache_dir='.\cache_dir')
     time.sleep(1)
+    preprocess_dataset(ds)
+
     return ds
 
 
 if __name__ == '__main__':
     # 选择数据集url
     PATH = '7e0a4faa0d0649918ae3e94ef34b94af.txt'
+    # 多种类型 小型
     PATH = '25d185f01b8c43b29420c48e50a11fad.txt'
     # PATH='8cf1ce3983ad4d5d8f45ee6469ab5dcc.txt'
     # 超大数据集
-    PATH = '91574142078b45c79d532d97b294ed44.txt'
-
-    PATH = 'c0bd7f5c79a24e48849432629f59639f.txt'
-    PATH = 'e416c488169f484485ad7575dcfc43ce.txt'
-    # PATH = "new.txt"
+    # PATH = '91574142078b45c79d532d97b294ed44.txt'
+    #
+    # PATH = 'c0bd7f5c79a24e48849432629f59639f.txt'
+    # PATH = '533223505102110720.txt'
+    PATH = "new.txt"
     #
     # PATH = 'b6a1d3f42b014fa9ae9cce04679a5e0f.txt'
-    print(load_sciencedb(txt=PATH))
+    iterable_ds=load_sciencedb(txt=PATH)
+    iterable_ds._format_type = 'arrow'
+    # ds=next(iter(iterable_ds))
+    # ds = next(iter(iterable_ds))
+    print(iterable_ds)
+    # ds = next(iter(iterable_ds))
+    # print(ds)
