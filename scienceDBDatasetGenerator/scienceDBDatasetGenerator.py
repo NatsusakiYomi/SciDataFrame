@@ -22,6 +22,7 @@ import chardet
 import datasets
 from PIL import Image
 from fsspec.utils import file_size
+from urllib.parse import urlparse, parse_qs
 
 # TODO: Add BibTeX citation
 # Find for instance the citation on arxiv or on the dataset repo/website
@@ -62,7 +63,10 @@ LIMIT=1024*1024*200
 
 
 def get_file_extension(url):
-    return os.path.splitext(url)[1][1:].lower()
+    parsed_url = urlparse(url)
+    query_params = parse_qs(parsed_url.query)
+    print(query_params)
+    return os.path.splitext(query_params['fileName'][0])[1].lower()
 
 
 def is_text_format(ext):
@@ -166,34 +170,38 @@ class NewDataset(datasets.GeneratorBasedBuilder):
 
         # download_config = datasets.DownloadConfig(num_proc=1, max_retries=5)
         cache_dir = os.path.join(dl_manager.download_config.cache_dir, "datasets")
-        if os.path.exists(cache_dir):
-            shutil.rmtree(cache_dir)
+        # if os.path.exists(cache_dir):
+        #     shutil.rmtree(cache_dir)
         downloaded_files = dl_manager.download(urls)
-        file2ext = dict(zip(downloaded_files, self.config.data_dir))
+        # file2ext = dict(zip(downloaded_files, self.config.data_dir))
         # dl_manager is a datasets.download.DownloadManager that can be used to download and extract URLS
         # It can accept any type or nested list/dict and will give back the same structure with the url replaced with path to local files.
         # By default the archives will be extracted and a path to a cached folder where they are extracted is returned instead of the archive
         # print('logging:',urls)
         return [
             datasets.SplitGenerator(
-                name='allofdata',
+                name=datasets.Split.TRAIN,
                 # These kwargs will be passed to _generate_examples
                 gen_kwargs={
-                    "file2ext": file2ext
+                    "filepaths": downloaded_files
                 },
             ),
         ]
 
     # method parameters are unpacked from `gen_kwargs` as given in `_split_generators`
-    def _generate_examples(self, file2ext):
+    def _generate_examples(self, filepaths):
         # TODO: This method handles input defined in _split_generators to yield (key, example) tuples from the dataset.
         # The `key` is for legacy reasons (tfds) and is not important in itself, but must be unique for each example.
         #     print(f"Processing image from URL: {urls}")
         # print(images)
         id_ = 0
-        for (file_path, file_ext) in file2ext.items():
+        for file_path in filepaths:
+            file_ext=get_file_extension(file_path)
+            print(file_path)
+            print(file_ext)
             chunk_flag=is_over_limit(file_path)
-            if chunk_flag  or (not is_pil_format(file_ext) and not is_text_format(file_ext)):
+            # if chunk_flag  or (not is_pil_format(file_ext) and not is_text_format(file_ext)):
+            if chunk_flag  or (not is_text_format(file_ext)):
                 try:
                     offset=0
                     while True:
