@@ -1,9 +1,13 @@
+from linecache import cache
+from re import split
+
 from datasets import load_dataset,dataset_dict
 from utils import url_parser,filter_url_from_index
 from utils import print_directory_tree
 from utils import DataOperator
 import os
 import time
+import tempfile
 
 
 
@@ -12,14 +16,16 @@ URL_TXT_ROOT = r'./urls'
 # 修改端口号
 os.environ['HTTP_PROXY'] = 'http://127.0.0.1:7890'
 os.environ['HTTPS_PROXY'] = 'http://127.0.0.1:7890'
-OPTION = 'ALL'
+OPTION = 'TEMP'
+OPTION = 'IN-MEMORY'
 REMOTE = True
 LOCAL_FILE_PATH = 'E:\Study\Postgrad_1\\research\\arrow\LocalDataset'
 # LOADING SCRIPT路径
-LOCAL_SCRIPT_PATH = "\Study\Postgrad_1\\research\\arrow\\scienceDBDatasetGenerator"
+LOCAL_SCRIPT_PATH = "C:\\Users\\Yomi\\PycharmProjects\\SciDB2Dataset\\scienceDBDatasetGenerator"
 # 缓存路径
-CACHE_DIR = '\Study\\Postgrad_1\\research\\arrow\cache_dir'
+CACHE_DIR = 'C:\\Users\\Yomi\\PycharmProjects\\SciDB2Dataset\\cache_dir\\'
 URL_LIST=[]
+MAX_LEN=30
 
 
 def read_url_from_txt(path):
@@ -29,14 +35,15 @@ def read_url_from_txt(path):
         return url_parser(url_lists)
 
 def preprocess_dataset(dataset_dict: dataset_dict):
-    data_operator=DataOperator(dataset_dict)
-    print(data_operator.get_dataset())
-    print(data_operator.split_dataset(0.2))
-    print(data_operator.filter_dataset((lambda example: example["text"] is not None and isinstance(example["text"], str) and len(example["text"]) > 100)))
-    print(data_operator.select_dataset([0,1,2]))
-    print(data_operator.unique_dataset('text'))
-    print(data_operator.sort_dataset('text'))
-    print(data_operator.flat_dataset())
+    # data_operator=DataOperator(dataset_dict)
+    # print(data_operator.get_dataset())
+    # print(data_operator.split_dataset(0.2))
+    # print(data_operator.filter_dataset((lambda example: example["text"] is not None and isinstance(example["text"], str) and len(example["text"]) > 100)))
+    # print(data_operator.select_dataset([0,1,2]))
+    # print(data_operator.unique_dataset('text'))
+    # print(data_operator.sort_dataset('text'))
+    # print(data_operator.flat_dataset())
+    pass
 
 
 def load_sciencedb(txt):
@@ -46,8 +53,13 @@ def load_sciencedb(txt):
         target_dir = input("请输入要下载的文件或者文件夹名称，以逗号分隔: ").split(',')
         urls_all,file_extensions=filter_url_from_index(dir_structure,target_dir)
         if OPTION == 'ALL':
-            ds = load_dataset(LOCAL_SCRIPT_PATH, cache_dir=CACHE_DIR, data_files=urls_all,
+            # Option1: temp file
+            with tempfile.TemporaryDirectory() as temp_cache_dir:
+                ds = load_dataset(LOCAL_SCRIPT_PATH, cache_dir=temp_cache_dir, data_files=urls_all,
                               data_dir=file_extensions)
+        else:
+            ds = load_dataset(LOCAL_SCRIPT_PATH,cache_dir=CACHE_DIR, data_files=urls_all,
+                              data_dir=file_extensions, streaming=True, split='train')
     else:
         ds = load_dataset(LOCAL_FILE_PATH, cache_dir='.\cache_dir')
     time.sleep(1)
@@ -68,12 +80,20 @@ if __name__ == '__main__':
     # PATH = 'c0bd7f5c79a24e48849432629f59639f.txt'
     # PATH = '533223505102110720.txt'
     PATH = "new.txt"
+    # PATH = "1gb.txt"
     #
     # PATH = 'b6a1d3f42b014fa9ae9cce04679a5e0f.txt'
+    # dataset = load_dataset("mc4", "en", streaming=True, split="train")
+    # ds = next(iter(dataset))
     iterable_ds=load_sciencedb(txt=PATH)
-    iterable_ds._format_type = 'arrow'
-    # ds=next(iter(iterable_ds))
+    # iterable_ds._format_type = 'arrow'
+    for example in iter(iterable_ds):
+        for column, value in example.items():
+            if value is not None:
+                # output = value if len(value) <= MAX_LEN else value[:MAX_LEN].decode() + '...'
+                print(f"{column} loaded")
+                break  # 如果只需要打印第一个非空列，找到后即可停止
     # ds = next(iter(iterable_ds))
-    print(iterable_ds)
+    # print(ds)
     # ds = next(iter(iterable_ds))
     # print(ds)
