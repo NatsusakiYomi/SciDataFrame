@@ -58,7 +58,7 @@ def load_sciencedb(txt):
                 ds = load_dataset(LOCAL_SCRIPT_PATH, cache_dir=temp_cache_dir, data_files=urls_all,
                               data_dir=file_extensions)
         else:
-            ds = load_dataset(LOCAL_SCRIPT_PATH,cache_dir=CACHE_DIR, data_files=urls_all,
+            ds = load_dataset(path=LOCAL_SCRIPT_PATH,cache_dir=CACHE_DIR, data_files=urls_all,
                               data_dir=file_extensions, streaming=True, split='train')
     else:
         ds = load_dataset(LOCAL_FILE_PATH, cache_dir='.\cache_dir')
@@ -80,6 +80,7 @@ if __name__ == '__main__':
     # PATH = 'c0bd7f5c79a24e48849432629f59639f.txt'
     # PATH = '533223505102110720.txt'
     PATH = "new.txt"
+    PATH='557575362591064064.txt'
     # PATH = "1gb.txt"
     #
     # PATH = 'b6a1d3f42b014fa9ae9cce04679a5e0f.txt'
