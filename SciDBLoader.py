@@ -1,0 +1,129 @@
+import os
+import tempfile
+
+from datasets import load_dataset, dataset_dict, IterableDataset
+
+from utils import DirectoryTree
+from utils import url_parser, filter_url_from_index
+
+os.environ["HF_DATA SETS_NUM_THREADS"] = "5"
+# 修改端口号
+os.environ['HTTP_PROXY'] = 'http://127.0.0.1:7890'
+os.environ['HTTPS_PROXY'] = 'http://127.0.0.1:7890'
+OPTION = 'TEMP'
+OPTION = 'IN-MEMORY'
+REMOTE = True
+LOCAL_FILE_PATH = 'E:\Study\Postgrad_1\\research\\arrow\LocalDataset'
+# LOADING SCRIPT路径
+CURRENT_DIRECTORY = os.path.dirname(os.path.abspath(__file__))
+LOCAL_SCRIPT_PATH = os.path.join(CURRENT_DIRECTORY, 'scienceDBDatasetGenerator')
+URL_TXT_ROOT = os.path.join(CURRENT_DIRECTORY, 'urls')
+# 缓存路径
+CACHE_DIR = os.path.join(CURRENT_DIRECTORY, 'cache_dir')
+URL_LIST = []
+MAX_LEN = 30
+
+
+def read_url_from_txt(path):
+    with open(os.path.join(URL_TXT_ROOT, path), 'r', encoding='utf-8') as f:
+        url_lists = f.readlines()
+        URL_LIST = url_lists
+        return url_parser(url_lists)
+
+
+def preprocess_dataset(dataset_dict: dataset_dict):
+    # data_operator=DataOperator(dataset_dict)
+    # print(data_operator.get_dataset())
+    # print(data_operator.split_dataset(0.2))
+    # print(data_operator.filter_dataset((lambda example: example["text"] is not None and isinstance(example["text"], str) and len(example["text"]) > 100)))
+    # print(data_operator.select_dataset([0,1,2]))
+    # print(data_operator.unique_dataset('text'))
+    # print(data_operator.sort_dataset('text'))
+    # print(data_operator.flat_dataset())
+    pass
+
+
+def load_schema(txt):
+    # method_directory = os.path.dirname(os.path.abspath(__file__))
+    # os.chdir(method_directory)
+    # print(os.getcwd())
+    dir_structure = read_url_from_txt(path=txt)
+    directory_tree = DirectoryTree()
+    return directory_tree.get_schema(dir_structure), dir_structure
+
+
+def load_scidb_dataset(dir_structure, string, streaming=False):
+    target_dirs = string.split(',')
+    urls_all, file_extensions = filter_url_from_index(dir_structure, target_dirs)
+    if streaming:
+        ds = load_dataset(LOCAL_SCRIPT_PATH, cache_dir=CACHE_DIR, data_files=urls_all,
+                          data_dir=file_extensions, streaming=True, split='train')
+    else:
+        # TODO 临时文件法无法获取扩展名
+        # Option1: temp file
+        # with tempfile.TemporaryDirectory() as temp_cache_dir:
+        #     ds = load_dataset(LOCAL_SCRIPT_PATH, cache_dir=temp_cache_dir, data_files=urls_all,
+        #                       data_dir=file_extensions)
+
+        ds = load_dataset(LOCAL_SCRIPT_PATH, cache_dir=CACHE_DIR, data_files=urls_all,
+                          data_dir=file_extensions)
+    return ds
+
+
+def load_sciencedb(txt, streaming=True):
+    if REMOTE:
+        dir_structure = read_url_from_txt(path=txt)
+        DirectoryTree()
+        target_dir = input("请输入要下载的文件或者文件夹名称，以逗号分隔: ").split(',')
+        urls_all, file_extensions = filter_url_from_index(dir_structure, target_dir)
+    else:
+        ds = load_dataset(LOCAL_FILE_PATH, cache_dir='.\cache_dir')
+    if streaming:
+        ds = load_dataset(LOCAL_SCRIPT_PATH, cache_dir=CACHE_DIR, data_files=urls_all,
+                          data_dir=file_extensions, streaming=True, split='train')
+    else:
+        # TODO 临时文件法无法获取扩展名
+        # Option1: temp file
+        # with tempfile.TemporaryDirectory() as temp_cache_dir:
+        #     ds = load_dataset(LOCAL_SCRIPT_PATH, cache_dir=temp_cache_dir, data_files=urls_all,
+        #                       data_dir=file_extensions)
+
+        ds = load_dataset(LOCAL_SCRIPT_PATH, cache_dir=CACHE_DIR, data_files=urls_all,
+                          data_dir=file_extensions)
+    # time.sleep(1)
+    # preprocess_dataset(ds)
+
+    return ds
+
+
+if __name__ == '__main__':
+    # 选择数据集url
+    PATH = '7e0a4faa0d0649918ae3e94ef34b94af.txt'
+    # 多种类型 小型
+    PATH = '25d185f01b8c43b29420c48e50a11fad.txt'
+    # PATH='8cf1ce3983ad4d5d8f45ee6469ab5dcc.txt'
+    # 超大数据集
+    # PATH = '91574142078b45c79d532d97b294ed44.txt'
+    #
+    # PATH = 'c0bd7f5c79a24e48849432629f59639f.txt'
+    # PATH = '533223505102110720.txt'
+    PATH = "new.txt"
+    # PATH = "1gb.txt"
+    #
+    # PATH = 'b6a1d3f42b014fa9ae9cce04679a5e0f.txt'
+    # dataset = load_dataset("mc4", "en", streaming=True, split="train")
+    # ds = next(iter(dataset))
+    iterable_ds = load_sciencedb(txt=PATH)
+    # iterable_ds._format_type = 'arrow'
+    for example in iter(iterable_ds):
+        for column, value in example.items():
+            if value is not None:
+                # output = value if len(value) <= MAX_LEN else value[:MAX_LEN].decode() + '...'
+                print(f"{column} loaded")
+                break  # 如果只需要打印第一个非空列，找到后即可停止
+    # ds = next(iter(iterable_ds))
+    # print(ds)
+    # ds = next(iter(iterable_ds))
+    # print(ds)
+
+

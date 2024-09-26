@@ -1,6 +1,6 @@
 import unittest
 
-from loadscienceDB import load_sciencedb
+from SciDBLoader import load_sciencedb
 
 
 class TestLoadDataset(unittest.TestCase):
@@ -18,7 +18,7 @@ class TestLoadDataset(unittest.TestCase):
     #     self.txt = 'b6a1d3f42b014fa9ae9cce04679a5e0f.txt'
 
     def test_load_txt_3(self):
-        self.txt = '533223505102110720.txt'
+        self.txt = 'new.txt'
 
     # def test_load_txt_4(self):
     #     self.txt = '557575362591064064.txt'
