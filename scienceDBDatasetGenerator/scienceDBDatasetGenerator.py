@@ -63,6 +63,7 @@ LIMIT=1024*1024*200
 
 
 def get_file_extension(url):
+    print(url)
     parsed_url = urlparse(url)
     query_params = parse_qs(parsed_url.query)
     print(query_params)
@@ -147,8 +148,8 @@ class NewDataset(datasets.GeneratorBasedBuilder):
             description=_DESCRIPTION,
             # This defines the different columns of the dataset and their types
             features=datasets.Features({
-                "text": datasets.Value(dtype="string"),
-                "image": datasets.Image(),
+                "text": datasets.Sequence(datasets.Value('string')),
+                "image": datasets.Value("binary"),
                 "binary": datasets.Value("binary")
             }),  # Here we define them above because they are different between the two configurations
 
@@ -209,9 +210,9 @@ class NewDataset(datasets.GeneratorBasedBuilder):
                             f.seek(offset)
                             chunk_binary_data = f.read(LIMIT)
                             yield id_, {
-                                "text": None,
-                                "image": None,
-                                "binary": chunk_binary_data
+                                "text": [''],
+                                "image": [b''],
+                                "binary": [chunk_binary_data]
                             }
                             id_ += 1
                             chunk_binary_data = f.read(LIMIT)
@@ -230,18 +231,18 @@ class NewDataset(datasets.GeneratorBasedBuilder):
                     document = f.read().strip().split('\n')
                     # print(document)
                     yield id_, {
-                                "text": document,
-                                "image": None,
-                                "binary": None
+                                "text": [document],
+                                "image": [b''],
+                                "binary": [b'']
                                 }
             else :
                 # print(file_path)
                 with Image.open(file_path, 'r') as img:
                     print(img)
                     yield id_, {
-                                "text": None,
-                                "image": img,
-                                "binary": None
+                                "text": [''],
+                                "image": [img],
+                                "binary": [b'']
                                 }
             id_+=random.randint(1,3)
             # print(id_)
