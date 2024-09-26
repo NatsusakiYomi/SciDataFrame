@@ -3,7 +3,7 @@ from re import split
 
 from datasets import load_dataset,dataset_dict
 from utils import url_parser,filter_url_from_index
-from utils import print_directory_tree
+from utils import DirectoryTree
 from utils import DataOperator
 import os
 import time
@@ -45,11 +45,17 @@ def preprocess_dataset(dataset_dict: dataset_dict):
     # print(data_operator.flat_dataset())
     pass
 
+def load_schema(txt):
+    os.chdir('C:\\Users\\Yomi\\PycharmProjects\\SciDB2Dataset')
+    # print(os.getcwd())
+    dir_structure = read_url_from_txt(path=txt)
+    directory_tree=DirectoryTree()
+    return directory_tree.get_schema(dir_structure)
 
 def load_sciencedb(txt):
     if REMOTE:
         dir_structure = read_url_from_txt(path=txt)
-        print_directory_tree(dir_structure)
+        DirectoryTree(dir_structure)
         target_dir = input("请输入要下载的文件或者文件夹名称，以逗号分隔: ").split(',')
         urls_all,file_extensions=filter_url_from_index(dir_structure,target_dir)
         if OPTION == 'ALL':

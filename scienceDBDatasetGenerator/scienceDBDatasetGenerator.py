@@ -56,7 +56,7 @@ _URLS = {
         'https://download.scidb.cn/download?fileId=e9f7757114cec9801274ff997d4c4f76&path=/V2/DHB-G-166_1.81um_tiff/20240118_ljz_GHB-G-6_1.81um_recon_Export0001.tiff&fileName=20240118_ljz_GHB-G-6_1.81um_recon_Export0001.tiff',
         'https://download.scidb.cn/download?fileId=aec49141149b35cd784ab86973880454&path=/V2/DHB-G-166_1.81um_tiff/20240118_ljz_GHB-G-6_1.81um_recon_Export0004.tiff&fileName=20240118_ljz_GHB-G-6_1.81um_recon_Export0004.tiff'],
     "second_domain": [
-        'https://download.scidb.cn/download?fileId=3db6c5f410e37ff2e35f4bc5eabae249&path=/V4/MODIS_Dysno_Cloudfree_C6.1_2002-2021.zip&fileName=MODIS_Dysno_Cloudfree_C6.1_2002-2021.zip'],
+        'https://download.scidb.cn/download?fileId=e27ffa47f7f9ba3fb72939a624a5e146&path=/V1/数据集/SEM试验结果/磷石膏/磷石膏 (1).tif&fileName=%E7%A3%B7%E7%9F%B3%E8%86%8F%20(1).tif'],
 }
 
 LIMIT=1024*1024*200
