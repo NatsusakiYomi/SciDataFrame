@@ -113,7 +113,7 @@ if __name__ == '__main__':
     # PATH = 'b6a1d3f42b014fa9ae9cce04679a5e0f.txt'
     # dataset = load_dataset("mc4", "en", streaming=True, split="train")
     # ds = next(iter(dataset))
-    iterable_ds = load_sciencedb(txt=PATH,streaming=True)
+    iterable_ds = load_sciencedb(txt=PATH,streaming=False)
     # iterable_ds._format_type = 'arrow'
     for example in iter(iterable_ds):
         for column, value in example.items():
