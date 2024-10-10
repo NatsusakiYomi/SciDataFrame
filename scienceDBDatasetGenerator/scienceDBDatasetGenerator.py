@@ -64,10 +64,10 @@ LIMIT=1024*1024*200
 
 def get_file_extension(url):
     print(url)
-    parsed_url = urlparse(url)
-    query_params = parse_qs(parsed_url.query)
+    parsed_url = list(map(urlparse,url))
+    query_params = list(map(lambda parse_url: parse_qs(parse_url.query), parsed_url))
     print(query_params)
-    return os.path.splitext(query_params['fileName'][0])[1].lower()
+    return list(map(lambda query_params: os.path.splitext(query_params['fileName'][0])[1].lower(), query_params))
 
 
 def is_text_format(ext):
@@ -149,8 +149,8 @@ class NewDataset(datasets.GeneratorBasedBuilder):
             # This defines the different columns of the dataset and their types
             features=datasets.Features({
                 "text": datasets.Sequence(datasets.Value('string')),
-                "image": datasets.Value("binary"),
-                "binary": datasets.Value("binary")
+                "image": datasets.Sequence(datasets.Value('binary')),
+                "binary": datasets.Sequence(datasets.Value('binary')),
             }),  # Here we define them above because they are different between the two configurations
 
             # If there's a common (input, target) tuple from the features, uncomment supervised_keys line below and
@@ -174,6 +174,8 @@ class NewDataset(datasets.GeneratorBasedBuilder):
         # if os.path.exists(cache_dir):
         #     shutil.rmtree(cache_dir)
         downloaded_files = dl_manager.download(urls)
+        exts = self.config.data_dir
+        # print(self.config.data_dir)
         # file2ext = dict(zip(downloaded_files, self.config.data_dir))
         # dl_manager is a datasets.download.DownloadManager that can be used to download and extract URLS
         # It can accept any type or nested list/dict and will give back the same structure with the url replaced with path to local files.
@@ -184,20 +186,19 @@ class NewDataset(datasets.GeneratorBasedBuilder):
                 name=datasets.Split.TRAIN,
                 # These kwargs will be passed to _generate_examples
                 gen_kwargs={
-                    "filepaths": downloaded_files
+                    "zip_paths_exts": zip(downloaded_files, exts),
                 },
             ),
         ]
 
     # method parameters are unpacked from `gen_kwargs` as given in `_split_generators`
-    def _generate_examples(self, filepaths):
+    def _generate_examples(self, zip_paths_exts):
         # TODO: This method handles input defined in _split_generators to yield (key, example) tuples from the dataset.
         # The `key` is for legacy reasons (tfds) and is not important in itself, but must be unique for each example.
         #     print(f"Processing image from URL: {urls}")
         # print(images)
         id_ = 0
-        for file_path in filepaths:
-            file_ext=get_file_extension(file_path)
+        for file_path, file_ext in zip_paths_exts:
             print(file_path)
             print(file_ext)
             chunk_flag=is_over_limit(file_path)

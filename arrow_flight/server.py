@@ -48,7 +48,7 @@ class MyFlightServer(fl.FlightServerBase):
             return fl.GeneratorStream(SCHEMA,generate_batches())
         else:
             # 返回 RecordBatchStream
-            return fl.RecordBatchStream(SCHEMA, dataset)
+            return fl.RecordBatchStream(dataset['train'].data.table)
 
 
 if __name__ == "__main__":

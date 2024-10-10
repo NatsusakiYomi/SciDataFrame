@@ -87,7 +87,7 @@ def load_sciencedb(txt, streaming=True):
         # with tempfile.TemporaryDirectory() as temp_cache_dir:
         #     ds = load_dataset(LOCAL_SCRIPT_PATH, cache_dir=temp_cache_dir, data_files=urls_all,
         #                       data_dir=file_extensions)
-
+        print(CACHE_DIR)
         ds = load_dataset(LOCAL_SCRIPT_PATH, cache_dir=CACHE_DIR, data_files=urls_all,
                           data_dir=file_extensions)
     # time.sleep(1)
@@ -113,7 +113,7 @@ if __name__ == '__main__':
     # PATH = 'b6a1d3f42b014fa9ae9cce04679a5e0f.txt'
     # dataset = load_dataset("mc4", "en", streaming=True, split="train")
     # ds = next(iter(dataset))
-    iterable_ds = load_sciencedb(txt=PATH)
+    iterable_ds = load_sciencedb(txt=PATH,streaming=True)
     # iterable_ds._format_type = 'arrow'
     for example in iter(iterable_ds):
         for column, value in example.items():
