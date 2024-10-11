@@ -54,10 +54,17 @@ def load_schema(txt):
 
 def load_scidb_dataset(dir_structure, string, streaming=False):
     target_dirs = string.split(',')
+    print(f"Streaming: {streaming}")
     urls_all, file_extensions = filter_url_from_index(dir_structure, target_dirs)
     if streaming:
-        ds = load_dataset(LOCAL_SCRIPT_PATH, cache_dir=CACHE_DIR, data_files=urls_all,
-                          data_dir=file_extensions, streaming=True, split='train')
+        ds = load_dataset(
+            LOCAL_SCRIPT_PATH,
+            cache_dir=CACHE_DIR,
+            data_files=urls_all,
+            data_dir=file_extensions,
+            streaming=True,
+            split='train'
+        )
     else:
         # TODO 临时文件法无法获取扩展名
         # Option1: temp file
@@ -113,7 +120,7 @@ if __name__ == '__main__':
     # PATH = 'b6a1d3f42b014fa9ae9cce04679a5e0f.txt'
     # dataset = load_dataset("mc4", "en", streaming=True, split="train")
     # ds = next(iter(dataset))
-    iterable_ds = load_sciencedb(txt=PATH,streaming=False)
+    iterable_ds = load_sciencedb(txt=PATH, streaming=False)
     # iterable_ds._format_type = 'arrow'
     for example in iter(iterable_ds):
         for column, value in example.items():
@@ -125,5 +132,3 @@ if __name__ == '__main__':
     # print(ds)
     # ds = next(iter(iterable_ds))
     # print(ds)
-
-
