@@ -1,3 +1,7 @@
+
+import sys
+sys.path.append('C:\\Users\\Yomi\\PycharmProjects\\SDB2')
+
 import pyarrow as pa
 import pyarrow.flight as fl
 import pandas as pd
@@ -27,10 +31,19 @@ class MyFlightServer(fl.FlightServerBase):
         self.folder_path = None
         # np.array格式的数据集
         self.dataset = None
+        self.schema = None
 
     def _make_flight_info(self, dataset):
-        # TODO:每次请求创建一个flight_info
-        pass
+        schema = SCHEMA
+        descriptor = pa.flight.FlightDescriptor.for_path(
+            dataset.encode('utf-8')
+        )
+        endpoints = [pa.flight.FlightEndpoint(dataset, ["grpc://0.0.0.0:8815"])]
+        return pa.flight.FlightInfo(schema,
+                                         descriptor,
+                                         endpoints,
+                                         -1,
+                                         -1)
 
     def get_flight_info(self, context, descriptor):
         return self._make_flight_info(descriptor.path[0].decode('utf-8'))
@@ -46,20 +59,20 @@ class MyFlightServer(fl.FlightServerBase):
         if action.type == "get_schema":
             # 创建示例 schema
             self.dataset_id = action.body.to_pybytes().decode('utf-8')
-            schema, self.dir_structure = load_schema(self.dataset_id)
+            self.schema, self.dir_structure = load_schema(self.dataset_id)
             sink = pa.BufferOutputStream()
-            with pa.ipc.new_file(sink, schema.schema) as writer:
-                writer.write_table(schema)
+            with pa.ipc.new_file(sink, self.schema.schema) as writer:
+                writer.write_table(self.schema)
             # 将 schema 序列化为 bytes
             return [sink.getvalue().to_pybytes()]
         elif action.type == "put_folder_path":
             self.folder_path = action.body.to_pybytes().decode('utf-8')
-            return []
+            # return []
         elif action.type == "streaming":
             if self.numerical_analysis:
                 raise fl.FlightError(f"Processing error: You can't stream the dataset after setting numerical analysis")
             self.streaming = eval(action.body.to_pybytes().decode('utf-8'))
-            return []
+            # return []
         elif action.type == "numerical_analysis":
             self.numerical_analysis = eval(action.body.to_pybytes().decode('utf-8'))
             if self.numerical_analysis:
@@ -67,13 +80,13 @@ class MyFlightServer(fl.FlightServerBase):
                 self.get_dataset()
                 result = self.analyze_num()
                 return [result]
-            return []
+            # return []
         elif action.type == "recommendation_preprocess":
             self.preprocess = eval(action.body.to_pybytes().decode('utf-8'))
             if self.preprocess:
                 self.recommendation_preprocess()
                 return [pickle.dumps("Data Preprocessed!")]
-            return []
+            # return []
         else:
             raise NotImplementedError
 
@@ -125,14 +138,15 @@ class MyFlightServer(fl.FlightServerBase):
     def analyze_num(self):
         np_data_matrix=self.dataset
         column_stats = {
-            "row": np_data_matrix.shape[0],
-            "col": np_data_matrix.shape[1],
-            "max": np.max(np_data_matrix, axis=0),
-            "min": np.min(np_data_matrix, axis=0),
-            "mean": np.mean(np_data_matrix, axis=0),
-            "median": np.median(np_data_matrix, axis=0),
-            "variance": np.var(np_data_matrix, axis=0)
+            "row": np.array([np_data_matrix.shape[0]]),
+            "col": np.array([np_data_matrix.shape[1]]),
+            "max": np.array([np.max(np_data_matrix, axis=0)]),
+            "min": np.array([np.min(np_data_matrix, axis=0)]),
+            "mean": np.array([np.mean(np_data_matrix, axis=0)]),
+            "median": np.array([np.median(np_data_matrix, axis=0)]),
+            "variance": np.array([np.var(np_data_matrix, axis=0)])
         }
+        print(column_stats)
         return pickle.dumps(column_stats)
 
     def nparray_to_table(self,nparray):
@@ -180,5 +194,5 @@ class MyFlightServer(fl.FlightServerBase):
 
 
 if __name__ == "__main__":
-    server = MyFlightServer(('0.0.0.0', 8815))
+    server = MyFlightServer('grpc://127.0.0.1:8815')
     server.serve()
