@@ -59,18 +59,21 @@ class MyFlightServer(fl.FlightServerBase):
             if self.numerical_analysis:
                 raise fl.FlightError(f"Processing error: You can't stream the dataset after setting numerical analysis")
             self.streaming = eval(action.body.to_pybytes().decode('utf-8'))
-            print(self.streaming)
-            print(f"is bool? {isinstance(self.streaming, bool)}")
+            return []
         elif action.type == "numerical_analysis":
-            self.streaming, self.numerical_analysis = False, True
-            self.folder_path = action.body.to_pybytes().decode('utf-8')
-            self.get_dataset()
-            result = self.analyze_num()
-            return [result]
+            self.numerical_analysis = eval(action.body.to_pybytes().decode('utf-8'))
+            if self.numerical_analysis:
+                self.streaming = False
+                self.get_dataset()
+                result = self.analyze_num()
+                return [result]
+            return []
         elif action.type == "recommendation_preprocess":
-            self.preprocess = True
-            self.recommendation_preprocess()
-            return [pickle.dumps("Data Preprocessed!")]
+            self.preprocess = eval(action.body.to_pybytes().decode('utf-8'))
+            if self.preprocess:
+                self.recommendation_preprocess()
+                return [pickle.dumps("Data Preprocessed!")]
+            return []
         else:
             raise NotImplementedError
 
@@ -144,7 +147,7 @@ class MyFlightServer(fl.FlightServerBase):
         return restored_table
 
     def recommendation_preprocess(self):
-        if isinstance(self.dataset, np.ndarray):
+        if not isinstance(self.dataset, np.ndarray):
             print("Haven't downloaded dataset, downloading right now...")
             self.get_dataset()
         # 1. 填充缺失值

@@ -5,7 +5,7 @@ from model import DataFrame
 import pickle
 
 # 创建 FlightClient 实例
-client = fl.FlightClient('grpc://localhost:8815')
+client = fl.FlightClient('grpc://localhost:8815',write_size_limit_bytes=1e8)
 start_train = False
 while not start_train:
     dataset_id = input("Enter dataset id: ")+".txt"
@@ -28,9 +28,12 @@ while not start_train:
     client.do_action(action)
     df = DataFrame(schema=schema)
 
+    is_analyze=input("Analyze num or not: ").lower() == 'yes'
+    is_preprocess=input("Preprocess or not: ").lower() == 'yes'
+    is_streaming=input("Streaming or not: ").lower() == 'yes'
     #进行数值特征分析
-    if input("Analyze num or not: ").lower() == 'yes':
-        action = fl.Action("numerical_analysis", folder_path.encode("utf-8"))
+    if is_analyze:
+        action = fl.Action("numerical_analysis", "True".encode("utf-8"))
         results = client.do_action(action)
         result=None
         # 处理返回的result
@@ -38,10 +41,13 @@ while not start_train:
             numerical_feature = pickle.loads(result_bytes.body)
             print("Received Numerical features:", numerical_feature)
             print("Received bytes:", result_bytes.body.size)
+    else:
+        action = fl.Action("numerical_analysis", "False".encode("utf-8"))
+        results = client.do_action(action)
 
     # 进行数据预处理
-    if input("Preprocess or not: ").lower() == 'yes':
-        action = fl.Action("recommendation_preprocess", folder_path.encode("utf-8"))
+    if is_preprocess:
+        action = fl.Action("recommendation_preprocess", "True".encode("utf-8"))
         results = client.do_action(action)
         result = None
         # 处理返回的result
@@ -49,17 +55,22 @@ while not start_train:
             result = pickle.loads(result_bytes.body)
             print("Received Message:", result)
             print("Received bytes:", result_bytes.body.size)
-
+    else:
+        action = fl.Action("recommendation_preprocess", "False".encode("utf-8"))
+        results = client.do_action(action)
     # 进行streaming
 
-    if input("Streaming or not: ").lower() == 'yes':
-        client.do_action("streaming","True".encode("utf-8"))
+    if is_streaming:
+        action = fl.Action("streaming", "True".encode("utf-8"))
+        client.do_action(action)
         reader = client.do_get(ticket)
         for index, chunk in enumerate(reader):
             print(f'Row {index + 1} received: {chunk.data.nbytes} bytes')
             df.concat(pa.Table.from_batches([chunk.data]))
     else:
         # 使用 do_get 获取文件数据
+        action = fl.Action("streaming", "False".encode("utf-8"))
+        client.do_action(action)
         reader = client.do_get(ticket)
         read_table = reader.read_all()
         df.concat(read_table)
