@@ -84,17 +84,6 @@ def get_file_size(file_path):
 def is_over_limit(file_path):
     return get_file_size(file_path) > LIMIT
 
-def char_det(file_path, num_bytes=1024):
-    file_size=get_file_size(file_path)
-
-    # 如果文件小于 max_bytes，读取整个文件，否则读取 max_bytes 字节
-    read_size = min(file_size, num_bytes)
-    with open(file_path, 'rb') as f:
-        raw_data = f.read(read_size)
-        result = chardet.detect(raw_data)
-        encoding = result['encoding']
-    print(f'Read with {read_size} file is encoded with {encoding}')
-    return encoding
 
 
 # TODO: Name of the dataset usually matches the script name with CamelCase instead of snake_case
@@ -148,9 +137,10 @@ class NewDataset(datasets.GeneratorBasedBuilder):
             description=_DESCRIPTION,
             # This defines the different columns of the dataset and their types
             features=datasets.Features({
-                "text": datasets.Sequence(datasets.Value('string')),
+                "text": datasets.Sequence(datasets.Value('binary')),
                 "image": datasets.Sequence(datasets.Value('binary')),
                 "binary": datasets.Sequence(datasets.Value('binary')),
+                "ext": datasets.Sequence(datasets.Value('string')),
             }),  # Here we define them above because they are different between the two configurations
 
             # If there's a common (input, target) tuple from the features, uncomment supervised_keys line below and
@@ -211,9 +201,10 @@ class NewDataset(datasets.GeneratorBasedBuilder):
                             f.seek(offset)
                             chunk_binary_data = f.read(LIMIT)
                             yield id_, {
-                                "text": [''],
+                                "text": [b''],
                                 "image": [b''],
-                                "binary": [chunk_binary_data]
+                                "binary": [chunk_binary_data],
+                                "ext": [file_ext],
                             }
                             id_ += 1
                             chunk_binary_data = f.read(LIMIT)
@@ -226,24 +217,26 @@ class NewDataset(datasets.GeneratorBasedBuilder):
                     pass
                     # print(f"Warning: Permission error : {e}")
             elif is_text_format(file_ext):
-                with open(file_path, 'r', encoding=char_det(file_path)) as f:
+                with open(file_path, 'rb' ) as f:
                     # print(file_path)
                     # print(f)
-                    document = f.read().strip().split('\n')
+                    document = f.read()
                     # print(document)
                     yield id_, {
                                 "text": [document],
                                 "image": [b''],
-                                "binary": [b'']
+                                "binary": [b''],
+                                "ext": [file_ext],
                                 }
             else :
                 # print(file_path)
                 with Image.open(file_path, 'r') as img:
                     print(img)
                     yield id_, {
-                                "text": [''],
+                                "text": [b''],
                                 "image": [img],
-                                "binary": [b'']
+                                "binary": [b''],
+                                "ext": [file_ext],
                                 }
             id_+=random.randint(1,3)
             # print(id_)

@@ -1,26 +1,36 @@
-
 import sys
-
-from pyarrow._flight import FlightError
-
+import os
+import io
 sys.path.append('C:\\Users\\Yomi\\PycharmProjects\\SDB2')
 
 import pyarrow as pa
+from pyarrow.csv import read_csv,ReadOptions
 import pyarrow.flight as fl
 import pandas as pd
 import numpy as np
 import pickle
-
-from pandas.core.internals.construction import arrays_to_mgr
+import chardet
+import csv
 
 from SciDBLoader import load_schema, load_scidb_dataset
 import ast
 
 SCHEMA = pa.schema([
-    ('text', pa.string()),
+    ('text', pa.binary()),
     ('image', pa.binary()),
     ('binary', pa.binary()),
+    ('ext', pa.string()),
 ])
+
+def char_det(file_binary, num_bytes=1024):
+    file_size=len(file_binary)
+
+    # 如果文件小于 max_bytes，读取整个文件，否则读取 max_bytes 字节
+    read_size = min(file_size, num_bytes)
+    result = chardet.detect(file_binary)
+    encoding = result['encoding']
+    print(f'Read with {read_size} file is encoded with {encoding}')
+    return encoding
 
 
 class MyFlightServer(fl.FlightServerBase):
@@ -35,6 +45,7 @@ class MyFlightServer(fl.FlightServerBase):
         # np.array格式的数据集
         self.dataset = None
         self.schema = None
+        self.dataset_type = None
 
     def _make_flight_info(self, dataset):
         schema = SCHEMA
@@ -78,37 +89,45 @@ class MyFlightServer(fl.FlightServerBase):
             # return []
         elif action.type == "numerical_analysis":
             self.numerical_analysis = eval(action.body.to_pybytes().decode('utf-8'))
+            self.dataset_type = 'num'
             if self.numerical_analysis:
                 self.streaming = False
-                self.get_dataset('num')
+                self.get_dataset(self.dataset_type)
                 result = self.analyze_num()
                 return [result]
             # return []
         elif action.type == "recommendation_preprocess":
             self.preprocess = eval(action.body.to_pybytes().decode('utf-8'))
+            self.dataset_type = 'num'
             if self.preprocess:
                 self.recommendation_preprocess()
                 return [pickle.dumps("Data Preprocessed!")]
             # return []
         elif action.type == "get_dataset_str":
             print("Getting dataset str table...")
-            self.get_dataset('str')
+            self.dataset_type = 'str'
+            self.get_dataset(self.dataset_type)
+        elif action.type == "img_preprocess":
+            pass
         else:
             raise NotImplementedError
 
     def do_get(self, context, ticket):
         # 这里假设 ticket 的内容是文件名和文件夹名
         dirs_string = ticket.ticket.decode('utf-8')
-        print(self.dataset_id)
+        # print(self.dataset_id)
         # 读取文件并构造 RecordBatch
         # 这里假设读取的文件内容符合 Arrow 的表格式
 
         if self.numerical_analysis:
             if self.streaming:
                 return Exception
+        print(f"self.dataset: {self.dataset}")
         print(f"is self.dataset not None: {self.dataset is not None}")
         if self.dataset is not None:
-            return fl.RecordBatchStream(self.nparray_to_table(self.dataset))
+            if self.dataset_type == 'num':
+                return fl.RecordBatchStream(self.nparray_to_table(self.dataset))
+            return fl.RecordBatchStream(self.dataset)
 
         dataset = load_scidb_dataset(
             self.dir_structure, dirs_string, streaming=not self.numerical_analysis and self.streaming)
@@ -131,32 +150,42 @@ class MyFlightServer(fl.FlightServerBase):
 
     def get_dataset(self,type):
         dataset = load_scidb_dataset(self.dir_structure, self.folder_path, streaming=self.streaming)
-        df = dataset['train'].data.table.to_pandas()
-        # print(df['text'][0][0])
+        dataset_table=None
+        if type=='num' or type=='str':
+            text_binary = dataset['train'].data.table['text'][0][0].as_py()
+            # print(text_binary)
+            # print(f'is instance bytes: {isinstance(text_binary, pa.binary)}')
+            dataset_table=read_csv(io.BytesIO(text_binary), read_options=ReadOptions(encoding=char_det(text_binary)))
+            if type=='num':
+                df = dataset_table.to_pandas()
 
-        def convert_to_numeric_matrix(data):
-            # 对每一行中的每个字符串解析成数值列表
-            numeric_matrix = np.array([np.fromstring(item, sep=',', dtype=np.float64) for item in data])
-            return numeric_matrix
-        def convert_to_string_matrix(data):
-            print(isinstance(data,list))
-            # print(type(data[0]))
-            print(data[1])
-            string_matrix=[row.split(',') for row in data]
-            print(string_matrix[0])
-            # string_matrix=np.array(string_matrix)
-            # print(string_matrix[0])
-            # string_matrix = np.array([row.split(',') for row in data])
-            # print(string_matrix)
-            return string_matrix
-        evaluated_data=ast.literal_eval(df['text'][0][0])
-        # print(evaluated_data)
-        if type == 'num':
-            np_data_matrix = convert_to_numeric_matrix(evaluated_data)
-        elif type == 'str':
-            np_data_matrix = convert_to_string_matrix(evaluated_data)
-        # print(np_data_matrix[1])
-        self.dataset = np_data_matrix
+                # 将 Pandas DataFrame 转换为 NumPy 数组
+                dataset_table = df.to_numpy()
+
+            # print(dataset_table)
+            # print(df['text'][0][0])
+            # def convert_to_numeric_matrix(data):
+            #     # 对每一行中的每个字符串解析成数值列表
+            #     numeric_matrix = np.array([[float(value) for value in row] for row in reader])
+            #     return numeric_matrix
+            #
+            # def convert_to_string_matrix(data):
+            #     # print(isinstance(data,list))
+            #     # print(type(data[0]))
+            #     # print(data[1])
+            #     string_matrix = np.array([[value for value in row] for row in reader])
+            #     # string_matrix=np.array(string_matrix)
+            #     # print(string_matrix[0])
+            #     # string_matrix = np.array([row.split(',') for row in data])
+            #     # print(string_matrix)
+            #     return string_matrix
+
+            # if type=='num':
+            #     np_data_matrix = convert_to_numeric_matrix(reader)
+            # else:
+            #     np_data_matrix = convert_to_string_matrix(reader)
+
+        self.dataset = dataset_table
         # print(self.dataset)
 
     def analyze_num(self):
@@ -176,18 +205,18 @@ class MyFlightServer(fl.FlightServerBase):
     def nparray_to_table(self,nparray):
         # 生成新的 schema，每列顺序命名并指定类型为 float64
         num_columns = nparray.shape[1]
-        fields = [pa.field(f"column{i + 1}", pa.string()) for i in range(num_columns)]
+        fields = [pa.field(f"column{i + 1}", pa.int64()) for i in range(num_columns)]
         new_schema = pa.schema(fields)
 
         # 将 NumPy 数组的每一列转为 PyArrow Array，并生成 PyArrow Table
-        arrays = [pa.array(nparray[:, i], type=pa.string()) for i in range(num_columns)]
+        arrays = [pa.array(nparray[:, i], type=pa.int64()) for i in range(num_columns)]
         restored_table = pa.Table.from_arrays(arrays, schema=new_schema)
         return restored_table
 
     def recommendation_preprocess(self):
         if not isinstance(self.dataset, np.ndarray):
             print("Haven't downloaded dataset, downloading right now...")
-            self.get_dataset('num')
+            self.get_dataset(self.dataset_type)
         # 1. 填充缺失值
         data_filled = np.copy(self.dataset)
         data_filled[:, 0] = np.nan_to_num(data_filled[:, 0], nan=-1)  # 用户ID填充为-1
