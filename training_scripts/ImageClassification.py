@@ -5,6 +5,7 @@ import torchvision.transforms as transforms
 from PIL import Image
 import io
 import random
+from pyarrow import ListScalar
 
 # 假设 `table` 是包含 TIFF 二进制数据的 PyArrow 表格
 # 其中 'image_data' 列存储了 TIFF 格式的二进制文件 (BinaryScalar)
@@ -20,7 +21,7 @@ def ImageClassification(df):
 
     # 从 PyArrow 表格的 'image_data' 列提取出二进制数据
     binary_column = df.data['binary']
-
+    # TODO: 现在每行为ListScalar
     # 将 PyArrow 列中的每个 BinaryScalar 转换为 PIL 图像
     pil_images = [binary_to_pil(binary_scalar) for binary_scalar in binary_column]
     labels = [random.randint(0,1) for i in range(len(pil_images))]
@@ -36,7 +37,6 @@ def ImageClassification(df):
         Resize((224, 224)),
         ToTensor(),
         normalize])
-
     # 将 PIL 图像列表和标签转换为 dataset 格式
     dataset_dict = {'image': pil_images, 'label': labels}
     dataset = Dataset.from_dict(dataset_dict)

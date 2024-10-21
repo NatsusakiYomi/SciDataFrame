@@ -18,6 +18,8 @@ import os
 import shutil
 
 import random
+from dataclasses import field
+
 import chardet
 import datasets
 from PIL import Image
@@ -85,12 +87,18 @@ def is_over_limit(file_path):
     return get_file_size(file_path) > LIMIT
 
 
+class CustomConfig(datasets.BuilderConfig):
+    def __init__(self, name, version, **kwargs):
+        self.data_exts = kwargs.pop("data_exts", [])
+        super().__init__(name=name,version=datasets.Version(version),**kwargs)
 
 # TODO: Name of the dataset usually matches the script name with CamelCase instead of snake_case
 class NewDataset(datasets.GeneratorBasedBuilder):
     """TODO: Short description of my dataset."""
 
     VERSION = datasets.Version("1.1.0")
+
+
 
     # This is an example of a dataset with multiple configurations.
     # If you don't want/need to define several sub-sets in your dataset,
@@ -103,21 +111,19 @@ class NewDataset(datasets.GeneratorBasedBuilder):
     # You will be able to load one or the other configurations in the following list with
     # data = datasets.load_dataset('my_dataset', 'first_domain')
     # data = datasets.load_dataset('my_dataset', 'second_domain')
-    BUILDER_CONFIGS = [
-        datasets.BuilderConfig(name="first_domain", version=VERSION,
-                               description="This part of my dataset covers a first domain"),
-        datasets.BuilderConfig(name="second_domain", version=VERSION,
-                               description="This part of my dataset covers a second domain"),
-    ]
+    BUILDER_CONFIG_CLASS = CustomConfig  # Must specify this to use custom config
 
-    DEFAULT_CONFIG_NAME = "first_domain"  # It's not mandatory to have a default configuration. Just use one if it make sense.
-    features = None
+
+    BUILDER_CONFIGS = [
+        CustomConfig(name="custom_config", version="1.0.0", description="your description"),
+    ]  # Configs initialization
+
+    DEFAULT_CONFIG_NAME = "custom_config"  # It's not mandatory to have a default configuration. Just use one if it make sense.
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
-        if 'datafiles' in kwargs and 'datadir' in kwargs:
-            self.config.data_files = kwargs['datafiles']
-            self.config.data_dir = kwargs['datadir']
+        # if 'data_files' in kwargs and 'data_exts' in kwargs:
+        self.config.data_files = kwargs['data_files']
         # 根据文件名设置特征和文件扩展名
         # url = self.config.data_files
         # self.file_extension = os.path.splitext(url)[1][1:].lower()
@@ -157,14 +163,14 @@ class NewDataset(datasets.GeneratorBasedBuilder):
     def _split_generators(self, dl_manager):
         # TODO: This method is tasked with downloading/extracting the data and defining the splits depending on the configuration
         # If several configurations are possible (listed in BUILDER_CONFIGS), the configuration selected by the user is in self.config.name
-        urls = self.config.data_files['train']
+        urls = self.config_kwargs['data_files']['train']
 
         # download_config = datasets.DownloadConfig(num_proc=1, max_retries=5)
         cache_dir = os.path.join(dl_manager.download_config.cache_dir, "datasets")
         # if os.path.exists(cache_dir):
         #     shutil.rmtree(cache_dir)
         downloaded_files = dl_manager.download(urls)
-        exts = self.config.data_dir
+        exts = self.config_kwargs['data_exts']
         # print(self.config.data_dir)
         # file2ext = dict(zip(downloaded_files, self.config.data_dir))
         # dl_manager is a datasets.download.DownloadManager that can be used to download and extract URLS
@@ -251,7 +257,7 @@ class NewDataset(datasets.GeneratorBasedBuilder):
 
 def main():
     # 脚本内调试
-    builder = NewDataset(config_name='second_domain', data_files=_URLS['second_domain'], data_dir=['zip'])
+    builder = NewDataset(config_name='custom_config', data_files=_URLS['second_domain'], data_exts=['zip'])
     dl_manager = datasets.DownloadManager()
     split_generators = builder._split_generators(dl_manager)
     for split_generator in split_generators:

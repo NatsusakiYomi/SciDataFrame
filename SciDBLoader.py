@@ -59,12 +59,15 @@ def load_scidb_dataset(dir_structure, string, streaming=False):
     if streaming:
         ds = load_dataset(
             LOCAL_SCRIPT_PATH,
+            name="custom_config",
             cache_dir=CACHE_DIR,
             data_files=urls_all,
-            data_dir=file_extensions,
             streaming=True,
-            split='train'
+            split='train',
+            trust_remote_code=True,
+            data_exts=file_extensions,
         )
+        print(ds)
     else:
         # TODO 临时文件法无法获取扩展名
         # Option1: temp file
@@ -72,8 +75,12 @@ def load_scidb_dataset(dir_structure, string, streaming=False):
         #     ds = load_dataset(LOCAL_SCRIPT_PATH, cache_dir=temp_cache_dir, data_files=urls_all,
         #                       data_dir=file_extensions)
 
-        ds = load_dataset(LOCAL_SCRIPT_PATH, cache_dir=CACHE_DIR, data_files=urls_all,
-                          data_dir=file_extensions)
+        ds = load_dataset(LOCAL_SCRIPT_PATH,
+                          name="custom_config",
+                          cache_dir=CACHE_DIR,
+                          trust_remote_code=True,
+                          data_files=urls_all,
+                          data_exts=file_extensions,)
     return ds
 
 
@@ -86,8 +93,18 @@ def load_sciencedb(txt, streaming=True):
     else:
         ds = load_dataset(LOCAL_FILE_PATH, cache_dir='.\cache_dir')
     if streaming:
-        ds = load_dataset(LOCAL_SCRIPT_PATH, cache_dir=CACHE_DIR, data_files=urls_all,
-                          data_dir=file_extensions, streaming=True, split='train')
+        # ds = load_dataset(LOCAL_SCRIPT_PATH, cache_dir=CACHE_DIR, data_files=urls_all,
+        #                   data_dir=file_extensions, streaming=True, split='train')
+        ds = load_dataset(
+            LOCAL_SCRIPT_PATH,
+            name="custom_config",
+            cache_dir=CACHE_DIR,
+            data_files=urls_all,
+            streaming=True,
+            split='train',
+            trust_remote_code=True,
+            data_exts=file_extensions,
+        )
     else:
         # TODO 临时文件法无法获取扩展名
         # Option1: temp file
@@ -95,8 +112,12 @@ def load_sciencedb(txt, streaming=True):
         #     ds = load_dataset(LOCAL_SCRIPT_PATH, cache_dir=temp_cache_dir, data_files=urls_all,
         #                       data_dir=file_extensions)
         print(CACHE_DIR)
-        ds = load_dataset(LOCAL_SCRIPT_PATH, cache_dir=CACHE_DIR, data_files=urls_all,
-                          data_dir=file_extensions)
+        ds = load_dataset(LOCAL_SCRIPT_PATH,
+                          name="custom_config",
+                          cache_dir=CACHE_DIR,
+                          trust_remote_code=True,
+                          data_files=urls_all,
+                          data_exts=file_extensions,)
     # time.sleep(1)
     # preprocess_dataset(ds)
 

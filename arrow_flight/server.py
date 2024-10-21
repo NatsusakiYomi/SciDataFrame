@@ -1,29 +1,39 @@
 import sys
 import os
 import io
-sys.path.append('C:\\Users\\Yomi\\PycharmProjects\\SDB2')
 
+
+# sys.path.append('C:\\Users\\Yomi\\PycharmProjects\\SDB2')
 import pyarrow as pa
-from pyarrow.csv import read_csv,ReadOptions
+import pyarrow
+from pyarrow.csv import read_csv, ReadOptions
 import pyarrow.flight as fl
 import pandas as pd
 import numpy as np
 import pickle
 import chardet
 import csv
-
+from datasets import IterableDataset
 from SciDBLoader import load_schema, load_scidb_dataset
 import ast
 
-SCHEMA = pa.schema([
+SCHEMA_TABLE = pa.schema([
     ('text', pa.binary()),
     ('image', pa.binary()),
     ('binary', pa.binary()),
     ('ext', pa.string()),
 ])
 
+SCHEMA_DATASET = pa.schema([
+    ('text', pa.list_(pa.binary())),
+    ('image', pa.list_(pa.binary())),
+    ('binary', pa.list_(pa.binary())),
+    ('ext', pa.list_(pa.string())),
+])
+
+
 def char_det(file_binary, num_bytes=1024):
-    file_size=len(file_binary)
+    file_size = len(file_binary)
 
     # 如果文件小于 max_bytes，读取整个文件，否则读取 max_bytes 字节
     read_size = min(file_size, num_bytes)
@@ -46,18 +56,20 @@ class MyFlightServer(fl.FlightServerBase):
         self.dataset = None
         self.schema = None
         self.dataset_type = None
+        # 如果是大于等于1的整型，则按需供给，否则一次性供给
+        self.batch_size = None
 
     def _make_flight_info(self, dataset):
-        schema = SCHEMA
+        schema = SCHEMA_TABLE
         descriptor = pa.flight.FlightDescriptor.for_path(
             dataset.encode('utf-8')
         )
         endpoints = [pa.flight.FlightEndpoint(dataset, ["grpc://0.0.0.0:8815"])]
         return pa.flight.FlightInfo(schema,
-                                         descriptor,
-                                         endpoints,
-                                         -1,
-                                         -1)
+                                    descriptor,
+                                    endpoints,
+                                    -1,
+                                    -1)
 
     def get_flight_info(self, context, descriptor):
         return self._make_flight_info(descriptor.path[0].decode('utf-8'))
@@ -72,6 +84,7 @@ class MyFlightServer(fl.FlightServerBase):
     def do_action(self, context, action):
         if action.type == "get_schema":
             # 创建示例 schema
+            self.dataset = self.batch_size = self.dataset_type = None
             self.dataset_id = action.body.to_pybytes().decode('utf-8')
             self.schema, self.dir_structure = load_schema(self.dataset_id)
             sink = pa.BufferOutputStream()
@@ -87,6 +100,8 @@ class MyFlightServer(fl.FlightServerBase):
                 raise fl.FlightError(f"Processing error: You can't stream the dataset after setting numerical analysis")
             self.streaming = eval(action.body.to_pybytes().decode('utf-8'))
             # return []
+        elif action.type == "batch_size":
+            self.batch_size = int(action.body.to_pybytes().decode('utf-8'))
         elif action.type == "numerical_analysis":
             self.numerical_analysis = eval(action.body.to_pybytes().decode('utf-8'))
             self.dataset_type = 'num'
@@ -124,39 +139,67 @@ class MyFlightServer(fl.FlightServerBase):
                 return Exception
         print(f"self.dataset: {self.dataset}")
         print(f"is self.dataset not None: {self.dataset is not None}")
-        if self.dataset is not None:
+
+        dataset = self.dataset
+
+
+
+        def generate_dataset_batches(batch_size,dataset):
+            # print(dataset)
+            for example in iter(dataset.batch(batch_size)):
+                table = pa.table(example)
+                yield table
+        def generate_table_batches(batch_size,dataset):
+            num_rows = dataset.num_rows
+            print(f"num_rows: {num_rows}")
+            for start in range(0, num_rows, batch_size):
+                end = min(start + batch_size, num_rows)
+                yield dataset.slice(start, end - start)
+
+        def is_iter_batch(dataset):
+            if self.batch_size is not None:
+                print(dataset)
+                # 按需供给
+                if not isinstance(dataset, pyarrow.Table):
+                    return fl.GeneratorStream(SCHEMA_DATASET, generate_dataset_batches(self.batch_size,dataset))
+                else:
+                    print(dataset)
+                    return fl.GeneratorStream(SCHEMA_TABLE, generate_table_batches(self.batch_size, dataset))
+
+            else:
+                # 返回 RecordBatchStream
+                # 一次性供给
+                if not isinstance(dataset, pyarrow.Table):
+                    return fl.RecordBatchStream(dataset['train'].data.table)
+                else:
+                    return fl.RecordBatchStream(dataset)
+
+
+
+        if dataset is not None:
             if self.dataset_type == 'num':
-                return fl.RecordBatchStream(self.nparray_to_table(self.dataset))
-            return fl.RecordBatchStream(self.dataset)
+                return is_iter_batch(self.nparray_to_table(self.dataset))
+            return is_iter_batch(self.dataset)
 
         dataset = load_scidb_dataset(
             self.dir_structure, dirs_string, streaming=not self.numerical_analysis and self.streaming)
 
-
-        def generate_batches():
-            for example in iter(dataset):
-                table = pa.table(example)
-                yield table
+        return is_iter_batch(dataset)
 
         # print(dataset)
-        if self.streaming:
-            return fl.GeneratorStream(SCHEMA, generate_batches())
-        else:
-            # 返回 RecordBatchStream
-            return fl.RecordBatchStream(dataset['train'].data.table)
 
     def action_bool(self, action):
         return eval(action.body.to_pybytes().decode('utf-8'))
 
-    def get_dataset(self,type):
+    def get_dataset(self, type):
         dataset = load_scidb_dataset(self.dir_structure, self.folder_path, streaming=self.streaming)
-        dataset_table=None
-        if type=='num' or type=='str':
+        dataset_table = None
+        if type == 'num' or type == 'str':
             text_binary = dataset['train'].data.table['text'][0][0].as_py()
             # print(text_binary)
             # print(f'is instance bytes: {isinstance(text_binary, pa.binary)}')
-            dataset_table=read_csv(io.BytesIO(text_binary), read_options=ReadOptions(encoding=char_det(text_binary)))
-            if type=='num':
+            dataset_table = read_csv(io.BytesIO(text_binary), read_options=ReadOptions(encoding=char_det(text_binary)))
+            if type == 'num':
                 df = dataset_table.to_pandas()
 
                 # 将 Pandas DataFrame 转换为 NumPy 数组
@@ -189,7 +232,7 @@ class MyFlightServer(fl.FlightServerBase):
         # print(self.dataset)
 
     def analyze_num(self):
-        np_data_matrix=self.dataset
+        np_data_matrix = self.dataset
         column_stats = {
             "row": np.array([np_data_matrix.shape[0]]),
             "col": np.array([np_data_matrix.shape[1]]),
@@ -202,7 +245,7 @@ class MyFlightServer(fl.FlightServerBase):
         print(column_stats)
         return pickle.dumps(column_stats)
 
-    def nparray_to_table(self,nparray):
+    def nparray_to_table(self, nparray):
         # 生成新的 schema，每列顺序命名并指定类型为 float64
         num_columns = nparray.shape[1]
         fields = [pa.field(f"column{i + 1}", pa.int64()) for i in range(num_columns)]
@@ -243,7 +286,7 @@ class MyFlightServer(fl.FlightServerBase):
 
         print("\n归一化后的数据：")
         print(data_normalized)
-        self.dataset=data_normalized
+        self.dataset = data_normalized
 
 
 if __name__ == "__main__":

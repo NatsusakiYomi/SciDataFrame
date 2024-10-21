@@ -3,25 +3,24 @@ from random import random
 
 from pyarrow.dataset import dataset
 
-sys.path.append('C:\\Users\\Yomi\\PycharmProjects\\SDB2')
+# sys.path.append('C:\\Users\\Yomi\\PycharmProjects\\SDB2')
 import pyarrow
 import pyarrow.flight as fl
-import model.DataFrame
 from model import DataFrame
 import pickle
-from training_scripts import BertMultiClassification, RecommendationModel, ImageClassification
-import time
-import grpc
+from training_scripts import *
+from utils import TrainingTask
 # server = grpc.server(..., options=[('grpc.so_reuseport', 1)])
 # server.add_insecure_port('[::]:8815')  # 监听所有接口，包括 IPv6
 import numpy as np
+
 
 # 创建 FlightClient 实例
 
 # upload_descriptor = pa.flight.FlightDescriptor.for_path("new.txt")
 # flight = client.get_flight_info(upload_descriptor)
 # descriptor = flight.descriptor
-def main(dataset_id,folder_path,is_analyze,is_preprocess,is_get_dataset_str,is_streaming,task):
+def main(dataset_id, folder_path, is_analyze, is_preprocess, is_get_dataset_str, is_streaming, task, batch_size):
     start_train = False
     while not start_train:
         client = fl.connect("grpc://localhost:8815")
@@ -30,11 +29,11 @@ def main(dataset_id,folder_path,is_analyze,is_preprocess,is_get_dataset_str,is_s
         action = fl.Action("get_schema", dataset_id.encode("utf-8"))
         client.do_action(action)
         schema_results = client.do_action(action)
-        schema=None
+        schema = None
         # 处理返回的 schema
         for schema_bytes in schema_results:
             with pyarrow.ipc.open_file(schema_bytes.body) as schema_file:
-                schema=schema_file.read_all()
+                schema = schema_file.read_all()
                 print("Received Schema:", schema)
                 print("Received bytes:", schema.nbytes)
             # 重建文件目录树
@@ -44,7 +43,7 @@ def main(dataset_id,folder_path,is_analyze,is_preprocess,is_get_dataset_str,is_s
 
         # 用户输入文件夹路径
         ticket = fl.Ticket(folder_path.encode('utf-8'))
-        action=fl.Action("put_folder_path", folder_path.encode("utf-8"))
+        action = fl.Action("put_folder_path", folder_path.encode("utf-8"))
         client.do_action(action)
         df = DataFrame(schema=schema)
 
@@ -53,7 +52,7 @@ def main(dataset_id,folder_path,is_analyze,is_preprocess,is_get_dataset_str,is_s
             action = fl.Action("numerical_analysis", "True".encode("utf-8"))
             # client.do_action(action)
             results = client.do_action(action)
-            result=None
+            result = None
             # 处理返回的result
             for result_bytes in results:
                 numerical_feature = pickle.loads(result_bytes.body)
@@ -80,37 +79,51 @@ def main(dataset_id,folder_path,is_analyze,is_preprocess,is_get_dataset_str,is_s
             action = fl.Action("get_dataset_str", "True".encode("utf-8"))
             results = client.do_action(action)
 
+        if batch_size is not None:
+            action = fl.Action("batch_size", str(batch_size).encode("utf-8"))
+            results = client.do_action(action)
+
         if is_streaming:
             action = fl.Action("streaming", "True".encode("utf-8"))
-            client.do_action(action,pyarrow.flight.FlightCallOptions(timeout=60))
-            reader = client.do_get(ticket)
-            for index, chunk in enumerate(reader):
-                print(f'Row {index + 1} received: {chunk.data.nbytes} bytes')
-                df.concat(pyarrow.Table.from_batches([chunk.data]))
+            client.do_action(action, pyarrow.flight.FlightCallOptions(timeout=60))
         else:
             # 使用 do_get 获取文件数据
             action = fl.Action("streaming", "False".encode("utf-8"))
-            client.do_action(action,pyarrow.flight.FlightCallOptions(timeout=60))
+            client.do_action(action, pyarrow.flight.FlightCallOptions(timeout=60))
+
+        if batch_size is None:
             reader = client.do_get(ticket)
             read_table = reader.read_all()
             df.concat(read_table)
             print(f'{read_table.num_rows} rows received: {read_table.nbytes} bytes')
+        else:
+            reader = client.do_get(ticket)
+            for index, chunk in enumerate(reader):
+                print(f'Row {index*batch_size + 1} to {(index+1)*batch_size} received: {chunk.data.nbytes} bytes')
+                df.concat(pyarrow.Table.from_batches([chunk.data]))
+            print(f'{df.data.num_rows} rows received: {df.data.nbytes} bytes')
+
         client.close()
         start_train = input("Start train? ").lower() == 'yes'
 
-    if task=='recommendation':
-        RecommendationModel(df)
-    elif task=='multilabelclassification':
-        BertMultiClassification(df)
-    else:
-        ImageClassification(df)
+    try:
+        if task == TrainingTask.Recommendation:
+            RecommendationModel(df)
+        elif task == TrainingTask.MultiLabelClassification:
+            BertMultiClassification(df)
+        elif task == TrainingTask.ImageClassification:
+            ImageClassification(df)
+        else:
+            raise NotImplementedError(f"Task {task} not implemented")
+    except NotImplementedError as e:
+        print(e)
 
 
 
 
 if __name__ == '__main__':
-    dataset_id='images_test'+ ".txt"
-    dataset_path=None
+    dataset_id = 'images_test' + ".txt"
+    dataset_path = None
     # dataset_path = input("Enter folder path to retrieve files: ")
     # dataset_id = input("Enter dataset id: ") + ".txt"
     # is_analyze = input("Analyze num or not: ").lower() == 'yes'
@@ -121,5 +134,6 @@ if __name__ == '__main__':
     is_preprocess = False
     is_get_dataset_str = False
     is_streaming = True
-    task='image'
-    main(dataset_id,dataset_path,is_analyze,is_preprocess,is_get_dataset_str,is_streaming,task)
+    task = TrainingTask.ImageClassification
+    batch_size = 2
+    main(dataset_id, dataset_path, is_analyze, is_preprocess, is_get_dataset_str, is_streaming, task, batch_size)
