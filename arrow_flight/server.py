@@ -2,8 +2,11 @@ import sys
 import os
 import io
 
+import datasets
 
-# sys.path.append('C:\\Users\\Yomi\\PycharmProjects\\SDB2')
+sys.path.append('C:\\Users\\Yomi\\PycharmProjects\\SDB2')
+
+from utils import Version
 import pyarrow as pa
 import pyarrow
 from pyarrow.csv import read_csv, ReadOptions
@@ -120,6 +123,7 @@ class MyFlightServer(fl.FlightServerBase):
             # return []
         elif action.type == "get_dataset_str":
             print("Getting dataset str table...")
+            self.streaming = False
             self.dataset_type = 'str'
             self.get_dataset(self.dataset_type)
         elif action.type == "img_preprocess":
@@ -137,44 +141,70 @@ class MyFlightServer(fl.FlightServerBase):
         if self.numerical_analysis:
             if self.streaming:
                 return Exception
-        print(f"self.dataset: {self.dataset}")
+        # print(f"self.dataset: {self.dataset}")
         print(f"is self.dataset not None: {self.dataset is not None}")
 
         dataset = self.dataset
 
+        def batch(ds: IterableDataset, batch_size: int, drop_last_batch: bool = False):
 
+            def batch_fn(unbatched):
+                return {k: [v] for k, v in unbatched.items()}
 
-        def generate_dataset_batches(batch_size,dataset):
+            return ds.map(batch_fn, batched=True, batch_size=batch_size, drop_last_batch=drop_last_batch)
+
+        def _iterable_dataset_generator(ds, batch_size):
+            return batch(ds, batch_size) if Version.IS_DATASETS_OUTDATED.value else ds.batch(batch_size)
+
+        def generate_dataset_batches(batch_size, ds):
             # print(dataset)
-            for example in iter(dataset.batch(batch_size)):
+            generator = _iterable_dataset_generator(ds, batch_size)
+            # print(generator)
+            for example in iter(generator):
+                # print(example)
                 table = pa.table(example)
                 yield table
-        def generate_table_batches(batch_size,dataset):
-            num_rows = dataset.num_rows
+
+        def generate_table_batches(batch_size, ds):
+            num_rows = ds.num_rows
             print(f"num_rows: {num_rows}")
             for start in range(0, num_rows, batch_size):
                 end = min(start + batch_size, num_rows)
-                yield dataset.slice(start, end - start)
+                yield ds.slice(start, end - start)
 
-        def is_iter_batch(dataset):
+        def merge_dict_to_table(it_ds):
+            merged_dict={}
+            for example in it_ds:
+                for key, value in example.items():
+                    if key not in merged_dict:
+                        merged_dict[key] = []  # 初始化为列表
+                    merged_dict[key].append(value)
+            return pa.table(merged_dict)
+
+
+
+        def is_iter_batch(ds):
             if self.batch_size is not None:
-                print(dataset)
+                # print(ds)
                 # 按需供给
-                if not isinstance(dataset, pyarrow.Table):
-                    return fl.GeneratorStream(SCHEMA_DATASET, generate_dataset_batches(self.batch_size,dataset))
+                if not isinstance(ds, pyarrow.Table):
+                    if not self.streaming:
+                        return fl.GeneratorStream(SCHEMA_TABLE,
+                                                  generate_table_batches(self.batch_size, ds['train'].data.table if Version.IS_DATASETS_OUTDATED.value else ds.data.table))
+                    return fl.GeneratorStream(SCHEMA_TABLE, generate_dataset_batches(self.batch_size, ds))
                 else:
-                    print(dataset)
-                    return fl.GeneratorStream(SCHEMA_TABLE, generate_table_batches(self.batch_size, dataset))
+                    return fl.GeneratorStream(ds.schema, generate_table_batches(self.batch_size, ds))
 
             else:
                 # 返回 RecordBatchStream
                 # 一次性供给
-                if not isinstance(dataset, pyarrow.Table):
-                    return fl.RecordBatchStream(dataset['train'].data.table)
+                if not isinstance(ds, pyarrow.Table):
+                    if isinstance(ds, IterableDataset):
+                        return fl.RecordBatchStream(merge_dict_to_table(ds))
+                    return fl.RecordBatchStream(ds['train'].data.table if Version.IS_DATASETS_OUTDATED.value else ds.data.table)
                 else:
-                    return fl.RecordBatchStream(dataset)
-
-
+                    print("一次性供给Table")
+                    return fl.RecordBatchStream(ds)
 
         if dataset is not None:
             if self.dataset_type == 'num':
@@ -183,7 +213,7 @@ class MyFlightServer(fl.FlightServerBase):
 
         dataset = load_scidb_dataset(
             self.dir_structure, dirs_string, streaming=not self.numerical_analysis and self.streaming)
-
+        # print(dataset)
         return is_iter_batch(dataset)
 
         # print(dataset)
@@ -194,16 +224,22 @@ class MyFlightServer(fl.FlightServerBase):
     def get_dataset(self, type):
         dataset = load_scidb_dataset(self.dir_structure, self.folder_path, streaming=self.streaming)
         dataset_table = None
+        # print(dataset)
         if type == 'num' or type == 'str':
-            text_binary = dataset['train'].data.table['text'][0][0].as_py()
+            table=dataset['train'].data.table if Version.IS_DATASETS_OUTDATED.value else dataset.data.table
+            text_binary = table['text'][0].as_py()
+            # print(text_binary)
+            # print(text_binary)
             # print(text_binary)
             # print(f'is instance bytes: {isinstance(text_binary, pa.binary)}')
             dataset_table = read_csv(io.BytesIO(text_binary), read_options=ReadOptions(encoding=char_det(text_binary)))
+            print(dataset_table)
             if type == 'num':
                 df = dataset_table.to_pandas()
 
                 # 将 Pandas DataFrame 转换为 NumPy 数组
                 dataset_table = df.to_numpy()
+                print(dataset_table)
 
             # print(dataset_table)
             # print(df['text'][0][0])

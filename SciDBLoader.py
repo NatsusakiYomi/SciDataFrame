@@ -5,6 +5,7 @@ from datasets import load_dataset, dataset_dict, IterableDataset
 
 from utils import DirectoryTree
 from utils import url_parser, filter_url_from_index
+from utils import Version
 
 os.environ["HF_DATA SETS_NUM_THREADS"] = "5"
 # 修改端口号
@@ -19,7 +20,12 @@ CURRENT_DIRECTORY = os.path.dirname(os.path.abspath(__file__))
 LOCAL_SCRIPT_PATH = os.path.join(CURRENT_DIRECTORY, 'scienceDBDatasetGenerator')
 URL_TXT_ROOT = os.path.join(CURRENT_DIRECTORY, 'urls')
 # 缓存路径
-CACHE_DIR = os.path.join(CURRENT_DIRECTORY, 'cache_dir')
+desktop_path = os.path.join(os.path.expanduser("~"), "Desktop")
+# 要创建的文件夹名称
+folder_name = "cache_dir"
+# 构建完整路径
+CACHE_DIR = os.path.join(desktop_path, folder_name)
+dir_path = os.makedirs(CACHE_DIR, exist_ok=True)
 URL_LIST = []
 MAX_LEN = 30
 
@@ -56,31 +62,20 @@ def load_scidb_dataset(dir_structure, string, streaming=False):
     target_dirs = string.split(',')
     print(f"Streaming: {streaming}")
     urls_all, file_extensions = filter_url_from_index(dir_structure, target_dirs)
+    kwargs={
+        "path":LOCAL_SCRIPT_PATH,
+        "name": "custom_config",
+        "cache_dir": CACHE_DIR,
+        "data_files": urls_all,
+        "split": 'train',
+        "data_exts": file_extensions,
+    }
+    if not Version.IS_DATASETS_OUTDATED.value:
+        kwargs['trust_remote_code']=True
     if streaming:
-        ds = load_dataset(
-            LOCAL_SCRIPT_PATH,
-            name="custom_config",
-            cache_dir=CACHE_DIR,
-            data_files=urls_all,
-            streaming=True,
-            split='train',
-            trust_remote_code=True,
-            data_exts=file_extensions,
-        )
-        print(ds)
-    else:
-        # TODO 临时文件法无法获取扩展名
-        # Option1: temp file
-        # with tempfile.TemporaryDirectory() as temp_cache_dir:
-        #     ds = load_dataset(LOCAL_SCRIPT_PATH, cache_dir=temp_cache_dir, data_files=urls_all,
-        #                       data_dir=file_extensions)
-
-        ds = load_dataset(LOCAL_SCRIPT_PATH,
-                          name="custom_config",
-                          cache_dir=CACHE_DIR,
-                          trust_remote_code=True,
-                          data_files=urls_all,
-                          data_exts=file_extensions,)
+        kwargs['streaming'] = True
+    ds = load_dataset(**kwargs,)
+    # print(ds)
     return ds
 
 
@@ -92,32 +87,20 @@ def load_sciencedb(txt, streaming=True):
         urls_all, file_extensions = filter_url_from_index(dir_structure, target_dir)
     else:
         ds = load_dataset(LOCAL_FILE_PATH, cache_dir='.\cache_dir')
+    kwargs = {
+        "path": LOCAL_SCRIPT_PATH,
+        "name": "custom_config",
+        "cache_dir": CACHE_DIR,
+        "data_files": urls_all,
+        "split": 'train',
+        "data_exts": file_extensions,
+    }
+    if not Version.IS_DATASETS_OUTDATED.value:
+        kwargs['trust_remote_code'] = True
     if streaming:
-        # ds = load_dataset(LOCAL_SCRIPT_PATH, cache_dir=CACHE_DIR, data_files=urls_all,
-        #                   data_dir=file_extensions, streaming=True, split='train')
-        ds = load_dataset(
-            LOCAL_SCRIPT_PATH,
-            name="custom_config",
-            cache_dir=CACHE_DIR,
-            data_files=urls_all,
-            streaming=True,
-            split='train',
-            trust_remote_code=True,
-            data_exts=file_extensions,
-        )
-    else:
-        # TODO 临时文件法无法获取扩展名
-        # Option1: temp file
-        # with tempfile.TemporaryDirectory() as temp_cache_dir:
-        #     ds = load_dataset(LOCAL_SCRIPT_PATH, cache_dir=temp_cache_dir, data_files=urls_all,
-        #                       data_dir=file_extensions)
-        print(CACHE_DIR)
-        ds = load_dataset(LOCAL_SCRIPT_PATH,
-                          name="custom_config",
-                          cache_dir=CACHE_DIR,
-                          trust_remote_code=True,
-                          data_files=urls_all,
-                          data_exts=file_extensions,)
+        kwargs['streaming'] = True
+    ds = load_dataset(**kwargs, )
+    # print(ds)
     # time.sleep(1)
     # preprocess_dataset(ds)
 
@@ -143,7 +126,8 @@ if __name__ == '__main__':
     # ds = next(iter(dataset))
     iterable_ds = load_sciencedb(txt=PATH, streaming=False)
     # iterable_ds._format_type = 'arrow'
-    for example in iter(iterable_ds):
+    # data_dict = {key: [row[key] for row in iterable_ds] for key in iterable_ds.features}
+    for example in iterable_ds:
         for column, value in example.items():
             if value is not None:
                 # output = value if len(value) <= MAX_LEN else value[:MAX_LEN].decode() + '...'

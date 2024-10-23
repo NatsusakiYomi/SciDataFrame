@@ -1,4 +1,6 @@
 import sys
+# sys.path.append('C:\\Users\\Yomi\\PycharmProjects\\SDB2')
+import pyarrow as pa
 from random import random
 
 from pyarrow.dataset import dataset
@@ -10,6 +12,7 @@ from model import DataFrame
 import pickle
 from training_scripts import *
 from utils import TrainingTask
+import time
 # server = grpc.server(..., options=[('grpc.so_reuseport', 1)])
 # server.add_insecure_port('[::]:8815')  # 监听所有接口，包括 IPv6
 import numpy as np
@@ -122,7 +125,7 @@ def main(dataset_id, folder_path, is_analyze, is_preprocess, is_get_dataset_str,
 
 
 if __name__ == '__main__':
-    dataset_id = 'images_test' + ".txt"
+    dataset_id = 'new' + ".txt"
     dataset_path = None
     # dataset_path = input("Enter folder path to retrieve files: ")
     # dataset_id = input("Enter dataset id: ") + ".txt"
@@ -130,10 +133,10 @@ if __name__ == '__main__':
     # is_preprocess = input("Preprocess or not: ").lower() == 'yes'
     # is_get_dataset_str = input("Get dataset as str table or not: ").lower() == 'yes'
     # is_streaming = input("Streaming or not: ").lower() == 'yes'
-    is_analyze = False
-    is_preprocess = False
+    is_analyze = True
+    is_preprocess = True
     is_get_dataset_str = False
     is_streaming = True
-    task = TrainingTask.ImageClassification
-    batch_size = 2
+    task = TrainingTask.Recommendation
+    batch_size = 100
     main(dataset_id, dataset_path, is_analyze, is_preprocess, is_get_dataset_str, is_streaming, task, batch_size)

@@ -15,6 +15,9 @@
 """TODO: Add a description here."""
 
 import os
+import sys
+sys.path.extend(["C:\\Users\\NatsusakiYomi\\Documents\\Study\\Postgrad1\\research\\Sci2DB\\test\\SciDB2Dataset"])
+print(sys.path)
 import shutil
 
 import random
@@ -25,6 +28,7 @@ import datasets
 from PIL import Image
 from fsspec.utils import file_size
 from urllib.parse import urlparse, parse_qs
+from utils import Version, Path
 
 # TODO: Add BibTeX citation
 # Find for instance the citation on arxiv or on the dataset repo/website
@@ -143,10 +147,10 @@ class NewDataset(datasets.GeneratorBasedBuilder):
             description=_DESCRIPTION,
             # This defines the different columns of the dataset and their types
             features=datasets.Features({
-                "text": datasets.Sequence(datasets.Value('binary')),
-                "image": datasets.Sequence(datasets.Value('binary')),
-                "binary": datasets.Sequence(datasets.Value('binary')),
-                "ext": datasets.Sequence(datasets.Value('string')),
+                "text": datasets.Value('binary'),
+                "image": datasets.Value('binary'),
+                "binary": datasets.Value('binary'),
+                "ext": datasets.Value('string'),
             }),  # Here we define them above because they are different between the two configurations
 
             # If there's a common (input, target) tuple from the features, uncomment supervised_keys line below and
@@ -163,14 +167,17 @@ class NewDataset(datasets.GeneratorBasedBuilder):
     def _split_generators(self, dl_manager):
         # TODO: This method is tasked with downloading/extracting the data and defining the splits depending on the configuration
         # If several configurations are possible (listed in BUILDER_CONFIGS), the configuration selected by the user is in self.config.name
-        urls = self.config_kwargs['data_files']['train']
 
-        # download_config = datasets.DownloadConfig(num_proc=1, max_retries=5)
+        if Version.IS_DATASETS_OUTDATED.value:
+            urls = self.config.data_files
+            exts = self.config.data_exts
+        else:
+            urls = self.config_kwargs['data_files']['train']
+            exts = self.config_kwargs['data_exts']
+
         cache_dir = os.path.join(dl_manager.download_config.cache_dir, "datasets")
-        # if os.path.exists(cache_dir):
-        #     shutil.rmtree(cache_dir)
         downloaded_files = dl_manager.download(urls)
-        exts = self.config_kwargs['data_exts']
+
         # print(self.config.data_dir)
         # file2ext = dict(zip(downloaded_files, self.config.data_dir))
         # dl_manager is a datasets.download.DownloadManager that can be used to download and extract URLS
@@ -207,10 +214,10 @@ class NewDataset(datasets.GeneratorBasedBuilder):
                             f.seek(offset)
                             chunk_binary_data = f.read(LIMIT)
                             yield id_, {
-                                "text": [b''],
-                                "image": [b''],
-                                "binary": [chunk_binary_data],
-                                "ext": [file_ext],
+                                "text": b'',
+                                "image": b'',
+                                "binary": chunk_binary_data,
+                                "ext": file_ext,
                             }
                             id_ += 1
                             chunk_binary_data = f.read(LIMIT)
@@ -229,20 +236,20 @@ class NewDataset(datasets.GeneratorBasedBuilder):
                     document = f.read()
                     # print(document)
                     yield id_, {
-                                "text": [document],
-                                "image": [b''],
-                                "binary": [b''],
-                                "ext": [file_ext],
+                                "text": document,
+                                "image": b'',
+                                "binary": b'',
+                                "ext": file_ext,
                                 }
             else :
                 # print(file_path)
                 with Image.open(file_path, 'r') as img:
                     print(img)
                     yield id_, {
-                                "text": [b''],
-                                "image": [img],
-                                "binary": [b''],
-                                "ext": [file_ext],
+                                "text": b'',
+                                "image": img,
+                                "binary": b'',
+                                "ext": file_ext,
                                 }
             id_+=random.randint(1,3)
             # print(id_)
