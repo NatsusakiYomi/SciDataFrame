@@ -133,7 +133,7 @@ class MyFlightServer(fl.FlightServerBase):
 
     def do_get(self, context, ticket):
         # 这里假设 ticket 的内容是文件名和文件夹名
-        dirs_string = ticket.ticket.decode('utf-8')
+        dirs_string = self.folder_path
         # print(self.dataset_id)
         # 读取文件并构造 RecordBatch
         # 这里假设读取的文件内容符合 Arrow 的表格式

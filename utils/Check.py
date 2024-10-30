@@ -15,6 +15,10 @@ class Version(Enum):
     OUTDATED_DATASETS_VERSION = parse_version('2.20')
     IS_DATASETS_OUTDATED = True if CURRENT_DATASETS_VERSION <= OUTDATED_DATASETS_VERSION else False
 
+class Level(Enum):
+    FOLDER = "dir"
+    FILE = "file"
+    DATA = "data"
 
 class Path(Enum):
     PRORJECT_PATH = os.path.abspath(os.path.join(os.path.dirname(os.path.abspath(__file__)), '..'))
