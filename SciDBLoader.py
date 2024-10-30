@@ -1,5 +1,6 @@
 import os
 import tempfile
+import time
 
 from datasets import load_dataset, dataset_dict, IterableDataset
 
@@ -118,7 +119,7 @@ if __name__ == '__main__':
     #
     # PATH = 'c0bd7f5c79a24e48849432629f59639f.txt'
     # PATH = '533223505102110720.txt'
-    PATH = "new.txt"
+    PATH = "images_test.txt"
     # PATH = "1gb.txt"
     #
     # PATH = 'b6a1d3f42b014fa9ae9cce04679a5e0f.txt'
@@ -133,6 +134,7 @@ if __name__ == '__main__':
                 # output = value if len(value) <= MAX_LEN else value[:MAX_LEN].decode() + '...'
                 print(f"{column} loaded")
                 break  # 如果只需要打印第一个非空列，找到后即可停止
+        time.sleep(3)
     # ds = next(iter(iterable_ds))
     # print(ds)
     # ds = next(iter(iterable_ds))

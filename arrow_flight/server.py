@@ -1,8 +1,11 @@
 import sys
 import os
 import io
+import time
 
 import datasets
+from sympy.codegen.ast import Raise
+from threading import Thread, Event, Lock
 
 sys.path.append('C:\\Users\\Yomi\\PycharmProjects\\SDB2')
 
@@ -49,6 +52,7 @@ def char_det(file_binary, num_bytes=1024):
 class MyFlightServer(fl.FlightServerBase):
     def __init__(self, location):
         super().__init__(location)
+        self.next_batch = None
         self.dir_structure = None
         self.streaming = False
         self.numerical_analysis = False
@@ -61,6 +65,12 @@ class MyFlightServer(fl.FlightServerBase):
         self.dataset_type = None
         # 如果是大于等于1的整型，则按需供给，否则一次性供给
         self.batch_size = None
+        self.is_batch_cache = False
+        self.batch_cache = None
+        self.is_updated = True
+        self.lock = Lock
+        self.is_yield = False
+        self.it_end = False
 
     def _make_flight_info(self, dataset):
         schema = SCHEMA_TABLE
@@ -87,7 +97,9 @@ class MyFlightServer(fl.FlightServerBase):
     def do_action(self, context, action):
         if action.type == "get_schema":
             # 创建示例 schema
-            self.dataset = self.batch_size = self.dataset_type = None
+            self.dataset = self.next_batch = self.batch_size = self.dataset_type = self.batch_cache = None
+            self.is_batch_cache = self.is_yield = self.it_end = False
+            self.is_updated = True
             self.dataset_id = action.body.to_pybytes().decode('utf-8')
             self.schema, self.dir_structure = load_schema(self.dataset_id)
             sink = pa.BufferOutputStream()
@@ -105,6 +117,8 @@ class MyFlightServer(fl.FlightServerBase):
             # return []
         elif action.type == "batch_size":
             self.batch_size = int(action.body.to_pybytes().decode('utf-8'))
+        elif action.type == "batch_cache":
+            self.is_batch_cache = eval(action.body.to_pybytes().decode('utf-8'))
         elif action.type == "numerical_analysis":
             self.numerical_analysis = eval(action.body.to_pybytes().decode('utf-8'))
             self.dataset_type = 'num'
@@ -156,16 +170,57 @@ class MyFlightServer(fl.FlightServerBase):
         def _iterable_dataset_generator(ds, batch_size):
             return batch(ds, batch_size) if Version.IS_DATASETS_OUTDATED.value else ds.batch(batch_size)
 
-        def generate_dataset_batches(batch_size, ds):
+        def data_iterator_thread(ds, done: Event):
+            """异步数据迭代器"""
+            while True:
+                print("In data_iterator_thread...")
+                try:
+                    if done.wait(timeout=10):
+                        self.is_updated = False
+                        print("get next batch...")
+                        result = next(ds)
+                        self.next_batch = pa.table(result)
+                        self.is_updated = True  # 异步下载下一个批次
+                except StopIteration:
+                    self.it_end = True
+                    print("iterator break")
+                    break
+
+        def generate_cache_dataset_batches(ds, batch_size):
+            """将异步生成器适配为同步生成器以供 Flight 使用"""
+
+            it_done, gen_done = Event(), Event()
+            iterator = iter(_iterable_dataset_generator(ds, batch_size))
+
+            # gen_thread = Thread(target=get_next_batch(), args=(iterator, it_done))
+            try:
+                it_thread = Thread(target=data_iterator_thread, args=(iterator, it_done))
+                it_thread.daemon = True
+                self.next_batch = pa.table(next(iterator))
+                it_thread.start()
+
+                while True and not self.it_end:
+                    if self.is_updated:
+                        it_done.set()
+                        yield self.next_batch
+                        it_done.clear()
+                print("generator break")
+                it_thread.join()
+            except StopIteration:
+                pass
+
+            # 返回一个迭代器，该迭代器每次从 async_gen() 获取下一个批次
+
+        def generate_dataset_batches(ds, batch_size):
             # print(dataset)
             generator = _iterable_dataset_generator(ds, batch_size)
             # print(generator)
-            for example in iter(generator):
-                # print(example)
+            for id,example in enumerate(iter(generator)):
+                print(f"已准备好第{id}个数据")
                 table = pa.table(example)
                 yield table
 
-        def generate_table_batches(batch_size, ds):
+        def generate_table_batches(ds, batch_size):
             num_rows = ds.num_rows
             print(f"num_rows: {num_rows}")
             for start in range(0, num_rows, batch_size):
@@ -173,15 +228,13 @@ class MyFlightServer(fl.FlightServerBase):
                 yield ds.slice(start, end - start)
 
         def merge_dict_to_table(it_ds):
-            merged_dict={}
+            merged_dict = {}
             for example in it_ds:
                 for key, value in example.items():
                     if key not in merged_dict:
                         merged_dict[key] = []  # 初始化为列表
                     merged_dict[key].append(value)
             return pa.table(merged_dict)
-
-
 
         def is_iter_batch(ds):
             if self.batch_size is not None:
@@ -190,10 +243,15 @@ class MyFlightServer(fl.FlightServerBase):
                 if not isinstance(ds, pyarrow.Table):
                     if not self.streaming:
                         return fl.GeneratorStream(SCHEMA_TABLE,
-                                                  generate_table_batches(self.batch_size, ds['train'].data.table if Version.IS_DATASETS_OUTDATED.value else ds.data.table))
-                    return fl.GeneratorStream(SCHEMA_TABLE, generate_dataset_batches(self.batch_size, ds))
+                                                  generate_table_batches(ds[
+                                                                             'train'].data.table if Version.IS_DATASETS_OUTDATED.value else ds.data.table,
+                                                                         self.batch_size))
+                    if self.is_batch_cache:
+                        return fl.GeneratorStream(SCHEMA_TABLE, generate_cache_dataset_batches(ds, self.batch_size))
+                    else:
+                        return fl.GeneratorStream(SCHEMA_TABLE, generate_dataset_batches(ds, self.batch_size))
                 else:
-                    return fl.GeneratorStream(ds.schema, generate_table_batches(self.batch_size, ds))
+                    return fl.GeneratorStream(ds.schema, generate_table_batches(ds, self.batch_size))
 
             else:
                 # 返回 RecordBatchStream
@@ -201,7 +259,8 @@ class MyFlightServer(fl.FlightServerBase):
                 if not isinstance(ds, pyarrow.Table):
                     if isinstance(ds, IterableDataset):
                         return fl.RecordBatchStream(merge_dict_to_table(ds))
-                    return fl.RecordBatchStream(ds['train'].data.table if Version.IS_DATASETS_OUTDATED.value else ds.data.table)
+                    return fl.RecordBatchStream(
+                        ds['train'].data.table if Version.IS_DATASETS_OUTDATED.value else ds.data.table)
                 else:
                     print("一次性供给Table")
                     return fl.RecordBatchStream(ds)
@@ -226,7 +285,7 @@ class MyFlightServer(fl.FlightServerBase):
         dataset_table = None
         # print(dataset)
         if type == 'num' or type == 'str':
-            table=dataset['train'].data.table if Version.IS_DATASETS_OUTDATED.value else dataset.data.table
+            table = dataset['train'].data.table if Version.IS_DATASETS_OUTDATED.value else dataset.data.table
             text_binary = table['text'][0].as_py()
             # print(text_binary)
             # print(text_binary)
