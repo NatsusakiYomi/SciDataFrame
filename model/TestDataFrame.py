@@ -68,7 +68,7 @@ folder_table = pa.table({'folder': ['folder1', 'folder2', 'folder3']})
 # 创建 MyDataFrame 实例，表示文件夹层次
 df = MyDataFrame(folder_table, level='folder')
 
-# 打开第一层文件夹，返回文件层次的 DataFrame
+# 打开第一层文件夹，返回文件层次的 MyDataFrame
 file_df = df.open(0)
 
 # 打开文件层次，返回文件的数据内容

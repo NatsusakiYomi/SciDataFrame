@@ -237,7 +237,7 @@ class MyFlightServer(fl.FlightServerBase):
             if type == 'num':
                 df = dataset_table.to_pandas()
 
-                # 将 Pandas DataFrame 转换为 NumPy 数组
+                # 将 Pandas MyDataFrame 转换为 NumPy 数组
                 dataset_table = df.to_numpy()
                 print(dataset_table)
 

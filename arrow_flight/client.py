@@ -10,10 +10,10 @@ import pyarrow
 import pyarrow.flight as fl
 from torch.package import analyze
 
-from model import DataFrame
+# from model import MyDataFrame
 import pickle
 from training_scripts import *
-from utils import TrainingTask
+from utils import TrainingTask, Level
 import time
 # server = grpc.server(..., options=[('grpc.so_reuseport', 1)])
 # server.add_insecure_port('[::]:8815')  # 监听所有接口，包括 IPv6
@@ -26,21 +26,26 @@ import numpy as np
 # flight = client.get_flight_info(upload_descriptor)
 # descriptor = flight.descriptor
 class Client():
-    def __init__(self, dataset_id, folder_path, is_analyze, is_preprocess, is_get_dataset_str, is_streaming, task,
-                 batch_size):
+    def __init__(self):
         start_train = False
+
+        self.fl_client = fl.connect("grpc://localhost:8815")
+
+
+    def load_init(self,  is_analyze, is_preprocess, is_get_dataset_str, is_streaming, task,
+                 batch_size):
+        # self.folder_path = folder_path
         self.is_analyze = is_analyze
         self.is_preprocess = is_preprocess
         self.is_get_dataset_str = is_get_dataset_str
         self.is_streaming = is_streaming
-        self.dataset_id = dataset_id
+        # self.dataset_id = dataset_id
         self.task = task
         self.batch_size = batch_size
-        self.fl_client = fl.connect("grpc://localhost:8815")
-        self.folder_path = folder_path
 
-    def get_schema(self):
+    def get_schema(self,dataset_id):
         # 获取 schema
+        self.dataset_id = dataset_id
         action = fl.Action("get_schema", self.dataset_id.encode("utf-8"))
         self.fl_client.do_action(action)
         schema_results = self.fl_client.do_action(action)
@@ -54,41 +59,42 @@ class Client():
         return schema
             # 重建文件目录树
 
-    def load(self):
+    def load(self,level=Level.FOLDER):
         # 进行数值特征分析
         ticket = fl.Ticket("".encode("utf-8"))
-        if self.is_analyze:
-            action = fl.Action("numerical_analysis", "True".encode("utf-8"))
-            # self.client.do_action(action)
-            results = self.fl_client.do_action(action)
-            result = None
-            # 处理返回的result
-            for result_bytes in results:
-                numerical_feature = pickle.loads(result_bytes.body)
-                print("Received Numerical features:", numerical_feature)
-                print("Received bytes:", result_bytes.body.size)
-        else:
-            action = fl.Action("numerical_analysis", "False".encode("utf-8"))
-            results = self.fl_client.do_action(action)
+        if level==Level.FILE:
+            if self.is_analyze:
+                action = fl.Action("numerical_analysis", "True".encode("utf-8"))
+                # self.client.do_action(action)
+                results = self.fl_client.do_action(action)
+                result = None
+                # 处理返回的result
+                for result_bytes in results:
+                    numerical_feature = pickle.loads(result_bytes.body)
+                    print("Received Numerical features:", numerical_feature)
+                    print("Received bytes:", result_bytes.body.size)
+            else:
+                action = fl.Action("numerical_analysis", "False".encode("utf-8"))
+                results = self.fl_client.do_action(action)
 
-        # 进行数据预处理
-        if self.is_preprocess:
-            action = fl.Action("recommendation_preprocess", "True".encode("utf-8"))
-            results = self.fl_client.do_action(action)
-            result = None
-            # 处理返回的result
-            for result_bytes in results:
-                result = pickle.loads(result_bytes.body)
-                print("Received Message:", result)
-                print("Received bytes:", result_bytes.body.size)
-        else:
-            action = fl.Action("recommendation_preprocess", "False".encode("utf-8"))
-            results = self.fl_client.do_action(action)
+            # 进行数据预处理
+            if self.is_preprocess:
+                action = fl.Action("recommendation_preprocess", "True".encode("utf-8"))
+                results = self.fl_client.do_action(action)
+                result = None
+                # 处理返回的result
+                for result_bytes in results:
+                    result = pickle.loads(result_bytes.body)
+                    print("Received Message:", result)
+                    print("Received bytes:", result_bytes.body.size)
+            else:
+                action = fl.Action("recommendation_preprocess", "False".encode("utf-8"))
+                results = self.fl_client.do_action(action)
 
-        # 进行streaming
-        if self.is_get_dataset_str:
-            action = fl.Action("get_dataset_str", "True".encode("utf-8"))
-            results = self.fl_client.do_action(action)
+            # 进行streaming
+            if self.is_get_dataset_str:
+                action = fl.Action("get_dataset_str", "True".encode("utf-8"))
+                results = self.fl_client.do_action(action)
 
         if self.batch_size is not None:
             action = fl.Action("batch_size", str(self.batch_size).encode("utf-8"))
@@ -107,49 +113,52 @@ class Client():
             reader = reader.read_all()
         return reader
 
+    def close(self):
+        self.fl_client.close()
+
 
 if __name__ == '__main__':
-    dataset_id = 'new' + ".txt"
-    dataset_path = None
+    pass
+    # dataset_id='images_test.txt'
+    # dataset_path = None
+    # is_analyze = True
+    # is_preprocess = True
+    # is_get_dataset_str = False
+    # is_streaming = True
+    # task = TrainingTask.Recommendation
+    # batch_size = 1
+    # kwargs={
+    #     # "dataset_id": dataset_id,
+    #     # "folder_path": dataset_path,
+    #     "is_analyze": is_analyze,
+    #     "is_preprocess": is_preprocess,
+    #     "is_get_dataset_str": is_get_dataset_str,
+    #     "is_streaming": is_streaming,
+    #     "task": task,
+    #     "batch_size": batch_size,
+    # }
+    # #根据配置新建DataFrame
+    # df = MyDataFrame()
+    # #获得数据集schema
+    # schema=df.get_schema(dataset_id)
+    # #打开文件（夹）
+    # df=df.open("out")
     # dataset_path = input("Enter folder path to retrieve files: ")
-    # dataset_id = input("Enter dataset id: ") + ".txt"
-    # is_analyze = input("Analyze num or not: ").lower() == 'yes'
-    # is_preprocess = input("Preprocess or not: ").lower() == 'yes'
-    # is_get_dataset_str = input("Get dataset as str table or not: ").lower() == 'yes'
-    # is_streaming = input("Streaming or not: ").lower() == 'yes'
-    is_analyze = True
-    is_preprocess = True
-    is_get_dataset_str = False
-    is_streaming = True
-    task = TrainingTask.Recommendation
-    batch_size = 100
-    kwargs={
-        "dataset_id": dataset_id,
-        "folder_path": dataset_path,
-        "is_analyze": is_analyze,
-        "is_preprocess": is_preprocess,
-        "is_get_dataset_str": is_get_dataset_str,
-        "is_streaming": is_streaming,
-        "task": task,
-        "batch_size": batch_size,
-    }
-    df = DataFrame(**kwargs)
-    df.get_schema()
-    df.open("数据集")
-    dataset_path = input("Enter folder path to retrieve files: ")
-    df.filter(dataset_path)
-    df.load()
-    if batch_size is not None:
-        df.iter_to_instance()
-    start_train = input("Start train? ").lower() == 'yes'
-    try:
-        if task == TrainingTask.Recommendation:
-            RecommendationModel(df)
-        elif task == TrainingTask.MultiLabelClassification:
-            BertMultiClassification(df)
-        elif task == TrainingTask.ImageClassification:
-            ImageClassification(df)
-        else:
-            raise NotImplementedError(f"Task {task} not implemented")
-    except NotImplementedError as e:
-        print(e)
+    # df=df.open(dataset_path)
+    # #加载数据
+    # df.load(**kwargs)
+    # #合并数据迭代器
+    # if batch_size is not None:
+    #     df.iter_to_instance()
+    # start_train = input("Start train? ").lower() == 'yes'
+    # try:
+    #     if task == TrainingTask.Recommendation:
+    #         RecommendationModel(df)
+    #     elif task == TrainingTask.MultiLabelClassification:
+    #         BertMultiClassification(df)
+    #     elif task == TrainingTask.ImageClassification:
+    #         ImageClassification(df)
+    #     else:
+    #         raise NotImplementedError(f"Task {task} not implemented")
+    # except NotImplementedError as e:
+    #     print(e)

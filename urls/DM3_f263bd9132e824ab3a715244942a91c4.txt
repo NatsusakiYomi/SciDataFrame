@@ -1,2 +1,1 @@
 https://download.scidb.cn/download?fileId=63428db9934f5e4e97ac8bf2&path=/V1/DateFile1-LUT.csv&fileName=DateFile1-LUT.csv
-https://download.scidb.cn/download?fileId=F_17274614&path=/V1/DateFile1-LUT.csv&fileName=DateFile1-LUT.csv

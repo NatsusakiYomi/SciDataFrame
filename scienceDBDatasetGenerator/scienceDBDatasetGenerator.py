@@ -65,7 +65,7 @@ _URLS = {
         'https://download.scidb.cn/download?fileId=e27ffa47f7f9ba3fb72939a624a5e146&path=/V1/数据集/SEM试验结果/磷石膏/磷石膏 (1).tif&fileName=%E7%A3%B7%E7%9F%B3%E8%86%8F%20(1).tif'],
 }
 
-LIMIT=1024*1024*200
+LIMIT=1024*1024*1024*4
 
 
 def get_file_extension(url):
@@ -147,9 +147,9 @@ class NewDataset(datasets.GeneratorBasedBuilder):
             description=_DESCRIPTION,
             # This defines the different columns of the dataset and their types
             features=datasets.Features({
-                "text": datasets.Value('binary'),
-                "image": datasets.Value('binary'),
-                "binary": datasets.Value('binary'),
+                "text": datasets.Value('large_binary'),
+                "image": datasets.Value('large_binary'),
+                "binary": datasets.Value('large_binary'),
                 "ext": datasets.Value('string'),
             }),  # Here we define them above because they are different between the two configurations
 

@@ -7,6 +7,7 @@ from utils import DirectoryTree
 from utils import url_parser, filter_url_from_index
 from utils import Version
 
+os.environ["FSSPEC_TIMEOUT"] = "36000"  # 设置超时时间为1200秒
 os.environ["HF_DATA SETS_NUM_THREADS"] = "5"
 # 修改端口号
 os.environ['HTTP_PROXY'] = 'http://127.0.0.1:7890'
@@ -99,7 +100,8 @@ def load_sciencedb(txt, streaming=True):
         kwargs['trust_remote_code'] = True
     if streaming:
         kwargs['streaming'] = True
-    ds = load_dataset(**kwargs, )
+    import aiohttp
+    ds = load_dataset(**kwargs, storage_options={'client_kwargs': {'timeout': aiohttp.ClientTimeout(total=36000)}})
     # print(ds)
     # time.sleep(1)
     # preprocess_dataset(ds)
@@ -117,9 +119,9 @@ if __name__ == '__main__':
     # PATH = '91574142078b45c79d532d97b294ed44.txt'
     #
     # PATH = 'c0bd7f5c79a24e48849432629f59639f.txt'
-    # PATH = '533223505102110720.txt'
-    PATH = "new.txt"
-    # PATH = "1gb.txt"
+    PATH = '533223505102110720.txt'
+    # PATH = "new.txt"
+    PATH = "2gb.txt"
     #
     # PATH = 'b6a1d3f42b014fa9ae9cce04679a5e0f.txt'
     # dataset = load_dataset("mc4", "en", streaming=True, split="train")
@@ -127,12 +129,13 @@ if __name__ == '__main__':
     iterable_ds = load_sciencedb(txt=PATH, streaming=False)
     # iterable_ds._format_type = 'arrow'
     # data_dict = {key: [row[key] for row in iterable_ds] for key in iterable_ds.features}
-    for example in iterable_ds:
-        for column, value in example.items():
-            if value is not None:
-                # output = value if len(value) <= MAX_LEN else value[:MAX_LEN].decode() + '...'
-                print(f"{column} loaded")
-                break  # 如果只需要打印第一个非空列，找到后即可停止
+
+    # for example in iterable_ds:
+    #     for column, value in example.items():
+    #         if value is not None:
+    #             # output = value if len(value) <= MAX_LEN else value[:MAX_LEN].decode() + '...'
+    #             print(f"{column} loaded")
+    #             break  # 如果只需要打印第一个非空列，找到后即可停止
     # ds = next(iter(iterable_ds))
     # print(ds)
     # ds = next(iter(iterable_ds))
