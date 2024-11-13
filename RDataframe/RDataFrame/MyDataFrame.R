@@ -6,6 +6,8 @@ library(reticulate)
 # use_python("C:\\Users\\Yomi\\.conda\\envs\\SCI2DB\\python.exe")
 # install.packages("arrow.flight")
 # install_pyarrow()
+py_install("pyarrow")
+py_install("pandas")
 pa <- reticulate::import("pyarrow")
 fl <- pa$flight
 
@@ -106,7 +108,7 @@ MyDataFrame <- R6Class(
           schema_filtered <- self$filter_depth_rows(self$schema, index)
         } else {
           schema_filtered <- slice
-          data <- self$flat_open(Name,self$streaming,self$batch_size)
+          data <- self$flat_open(Name)
         }
         
         # 创建MyDataFrame对象
