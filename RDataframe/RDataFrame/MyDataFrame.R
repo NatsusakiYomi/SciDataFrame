@@ -1,13 +1,12 @@
 # install.packages("reticulate")
-
 library(R6)
 library(reticulate)
 # library(arrow)
-# use_python("C:\\Users\\Yomi\\.conda\\envs\\SCI2DB\\python.exe")
+# use_python("C:\\Users\\Yomi\\OneDrive - University of California\\文档\\.virtualenvs\\myenv\\Scripts\\python.exe")
 # install.packages("arrow.flight")
 # install_pyarrow()
-py_install("pyarrow")
-py_install("pandas")
+# py_install("pyarrow")
+# py_install("pandas")
 pa <- reticulate::import("pyarrow")
 fl <- pa$flight
 

@@ -60,7 +60,7 @@ def test_mydataframe():
     # df = df.open("out")
     # df = df.open(dataset_path)
     # 加载数据
-    df.load(**kwargs)
+    df.flat_open()
     for i in df:
         pass
     # 合并数据迭代器

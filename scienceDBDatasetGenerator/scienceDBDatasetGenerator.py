@@ -147,9 +147,9 @@ class NewDataset(datasets.GeneratorBasedBuilder):
             description=_DESCRIPTION,
             # This defines the different columns of the dataset and their types
             features=datasets.Features({
-                "text": datasets.Value('large_binary'),
-                "image": datasets.Value('large_binary'),
-                "binary": datasets.Value('large_binary'),
+                "text": datasets.Value('binary'),
+                "image": datasets.Value('binary'),
+                "binary": datasets.Value('binary'),
                 "ext": datasets.Value('string'),
             }),  # Here we define them above because they are different between the two configurations
 

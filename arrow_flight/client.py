@@ -29,11 +29,11 @@ class Client():
     def __init__(self):
         start_train = False
 
-        self.fl_client = fl.connect("grpc://localhost:8815")
+        self.fl_client = fl.connect("grpc://127.0.0.1:8815")
 
 
     def load_init(self,  is_analyze, is_preprocess, is_get_dataset_str, is_streaming, task,
-                 batch_size):
+                 is_iterate,batch_size=1):
         # self.folder_path = folder_path
         self.is_analyze = is_analyze
         self.is_preprocess = is_preprocess
@@ -42,6 +42,7 @@ class Client():
         # self.dataset_id = dataset_id
         self.task = task
         self.batch_size = batch_size
+        self.is_iterate = is_iterate
 
     def get_schema(self,dataset_id):
         # 获取 schema
@@ -59,7 +60,7 @@ class Client():
         return schema
             # 重建文件目录树
 
-    def load(self,level=Level.FOLDER):
+    def flat_open(self,level=Level.FOLDER):
         # 进行数值特征分析
         ticket = fl.Ticket("".encode("utf-8"))
         if level==Level.FILE:
@@ -96,7 +97,7 @@ class Client():
                 action = fl.Action("get_dataset_str", "True".encode("utf-8"))
                 results = self.fl_client.do_action(action)
 
-        if self.batch_size is not None:
+        if self.is_iterate:
             action = fl.Action("batch_size", str(self.batch_size).encode("utf-8"))
             results = self.fl_client.do_action(action)
 
@@ -109,7 +110,7 @@ class Client():
             self.fl_client.do_action(action, pyarrow.flight.FlightCallOptions(timeout=60))
 
         reader = self.fl_client.do_get(ticket)
-        if self.batch_size is None:
+        if not self.is_iterate:
             reader = reader.read_all()
         return reader
 

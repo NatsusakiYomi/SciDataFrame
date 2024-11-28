@@ -79,3 +79,24 @@ def filter_url_from_index(directory_structure, target_dir):
         print(f"目录 '{target_dir}' 不存在或没有包含文件。")
 
     return all_urls,all_exts
+
+if __name__ == '__main__':
+    urls = [
+        'http://localhost:8000/arrow/flight/1.txt?path=arrow/flight&fileName=1.txt',
+        'http://localhost:8000/arrow/flight/2.txt?path=arrow/flight&fileName=2.txt',
+        'http://localhost:8000/arrow/flight/3.txt?path=arrow/flight&fileName=3.txt',
+        'http://localhost:8000/arrow/flight/4.txt?path=arrow/flight&fileName=4.txt',
+        'http://localhost:8000/arrow/flight/5.txt?path=arrow/flight&fileName=5.txt',
+        'http://localhost:8000/arrow/flight/6.txt?path=arrow/flight&fileName=6.txt',
+        'http://localhost:8000/arrow/flight/7.txt?path=arrow/flight&fileName=7.txt',
+        'http://localhost:8000/arrow/flight/8.txt?path=arrow/flight&fileName=8.txt',
+        'http://localhost:8000/arrow/flight/9.txt?path=arrow/flight&fileName=9.txt',
+        'http://localhost:8000/arrow/flight/10.txt?path=arrow/flight&fileName=10.txt',
+        'http://localhost:8000/arrow/flight/11.txt?path=arrow/flight&fileName=11.txt',
+        'http://localhost:8000/arrow/flight/12.txt?path=arrow/flight&fileName=12.txt',
+        'http://localhost:8000/arrow/flight/13.txt?path=arrow/flight&fileName=13.txt',
+        'http://localhost:8000/arrow/flight/14.txt?path=arrow/flight&fileName=14.txt',
+        'http://localhost:8000/arrow/flight/15.txt?path=arrow/flight&fileName=15.txt',
+        'http://localhost:8000/arrow/flight/16.txt?path=arrow/flight&fileName=16.txt',
+        'http://localhost:8000/arrow/flight/17.txt?path=arrow/flight&fileName=17.txt',
+        'http://localhost:8000/arrow/flight/18.txt?path=arrow/flight&fileName=18.txt',]

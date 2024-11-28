@@ -328,3 +328,4 @@ class MyFlightServer(fl.FlightServerBase):
 if __name__ == "__main__":
     server = MyFlightServer('grpc://127.0.0.1:8815')
     server.serve()
+

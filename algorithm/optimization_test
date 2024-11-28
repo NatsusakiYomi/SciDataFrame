@@ -1,0 +1,251 @@
+import os
+
+import numba
+
+from SciDBLoader import read_url_from_txt, URL_TXT_ROOT
+
+API_KEY = '&api_key=bfd4d663cbf0e5042b9f26fcfb29d71a'
+
+
+def url_preprocess(url):
+    clean_url = url.strip()
+    file_extension = os.path.splitext(clean_url)[1][1:].lower()
+
+    # 优化字符串查找，避免过多的split操作
+    path_start = clean_url.find('path=')
+    if path_start != -1:
+        # 提取"path="之后的内容直到下一个'&'或字符串结束
+        path_end = clean_url.find('&', path_start)
+        if path_end == -1:
+            filepath = clean_url[path_start + 5:]
+        else:
+            filepath = clean_url[path_start + 5:path_end]
+        dirs = filepath.strip('/').split('/')
+    else:
+        # 处理不包含"path="的URL
+        path_start = clean_url.find('://') + 3
+        path_end = clean_url.find('?', path_start)
+        if path_end == -1:
+            path_end = len(clean_url)
+        path = clean_url[path_start:path_end]
+        dirs = path.strip('/').split('/')
+
+    return dirs, clean_url, file_extension
+
+# @numba.jit
+def custom_splitext(url):
+    index = url.rfind('.')
+    if index != -1:
+        return url[index:]
+    return ''
+
+# @numba.jit
+def modified_url_preprocess(url):
+    clean_url = url.strip()
+    file_extension = os.path.splitext(clean_url)[1][1:].lower()
+    clean_url += API_KEY
+    # clean_url = quote(clean_url, safe='/:=&?#+!,')
+    parts = clean_url.strip().split('&')
+    filepath_part = None
+    # filepath_part = next(part for part in parts if part.startswith('path='))
+    # filename_part = next(part for part in parts if part.startswith('fileName='))
+    for part in parts:
+        if part.startswith("path="):
+            filepath_part = part
+    if filepath_part:
+        filepath = filepath_part.split('=')[1]
+        # filename = filename_part.split('=')[1]
+        split = filepath.rsplit('/', 1)[0]
+        dirs = filepath.strip('/').split('/')
+    else:
+        split = parts[0].rsplit('/', 1)[0]
+        dirs = parts[0].split('/')[2:]
+
+
+    return dirs, clean_url, file_extension, split
+
+
+def get_deepest_level(i, dirs, current_level):
+    for dir in dirs[i][:-1]:
+        if dir not in current_level:
+            current_level[dir] = {}
+        current_level = current_level[dir]
+    return current_level
+
+
+def loop_construct(current, dirs, clean_urls, file_extensions, dir_structure):
+    current_level = dir_structure
+    for dir in dirs[current][:-1]:
+        if dir not in current_level:
+            current_level[dir] = {}
+        current_level = current_level[dir]
+    current_level[dirs[current][-1]] = (clean_urls[current], file_extensions[current])
+
+from collections import defaultdict
+def url_parser(url_lists):
+    dir_structure = {}
+    splits = {}
+    clean_urls = []
+    file_extensions = []
+    for url in url_lists:
+        dirs, clean_url, file_extension = url_preprocess(url)
+
+        # split = os.path.join(*dirs[:-1])
+
+        current_level = dir_structure
+        for dir in dirs[:-1]:
+            if dir not in current_level:
+                current_level[dir] = {}
+            current_level = current_level[dir]
+        current_level[dirs[-1]] = (clean_url, file_extension)
+
+    return dir_structure
+
+def index_construct_loop(last_split,url_list, size):
+    cnt = 0
+    dirs = []
+    clean_urls = []
+    file_extensions = []
+    partition_index = [(0, 0)]
+    for index, url in enumerate(url_list):
+        dir, clean_url, file_extension, split = modified_url_preprocess(url)
+
+        dirs.append(dir)
+        clean_urls.append(clean_url)
+        file_extensions.append(file_extension)
+
+        if cnt != 0 and cnt < size:
+            cnt += 1
+            continue
+        if cnt == size:
+            cnt = 0
+            last_split = split
+            partition_index.append((index, 1))
+        if split != last_split:
+            partition_index.append((index, 0))
+            cnt += 1
+        last_split = split
+    return dirs, clean_urls, file_extensions, partition_index
+
+
+from itertools import groupby
+
+def modified_url_parser(url_lists):
+    dir_structure = {}
+    current_level = dir_structure
+    last_dirs = []
+
+    for url in url_lists:
+        dirs, clean_url, file_extension, _ = modified_url_preprocess(url)
+        # Find common prefix length with last_dirs
+        common_length = 0
+        for l_dir, c_dir in zip(last_dirs, dirs):
+            if l_dir == c_dir:
+                common_length += 1
+            else:
+                break
+        # Reset current_level to common ancestor
+        current_level = dir_structure
+        for dir in dirs[:common_length]:
+            current_level = current_level[dir]
+        # Build the rest of the path
+        for dir in dirs[common_length:-1]:
+            current_level = current_level.setdefault(dir, {})
+        current_level[dirs[-1]] = (clean_url, file_extension)
+        last_dirs = dirs
+    return dir_structure
+
+
+import os
+from collections import defaultdict
+from concurrent.futures import ThreadPoolExecutor
+
+
+# 定义Trie节点
+class TrieNode:
+    def __init__(self):
+        self.children = {}
+        self.is_end = False
+        self.data = None
+
+
+# 插入路径到Trie中
+def insert_into_trie(root, dirs, data):
+    node = root
+    for dir in dirs:
+        node = node.children.setdefault(dir, TrieNode())
+    node.is_end = True
+    node.data = data
+
+
+# 优化的URL预处理函数
+def trie_url_preprocess(url):
+    clean_url = url.strip()
+    file_extension = os.path.splitext(clean_url)[1][1:].lower()
+
+    # 优化字符串查找，避免过多的split操作
+    path_start = clean_url.find('path=')
+    if path_start != -1:
+        # 提取"path="之后的内容直到下一个'&'或字符串结束
+        path_end = clean_url.find('&', path_start)
+        if path_end == -1:
+            filepath = clean_url[path_start + 5:]
+        else:
+            filepath = clean_url[path_start + 5:path_end]
+        dirs = filepath.strip('/').split('/')
+    else:
+        # 处理不包含"path="的URL
+        path_start = clean_url.find('://') + 3
+        path_end = clean_url.find('?', path_start)
+        if path_end == -1:
+            path_end = len(clean_url)
+        path = clean_url[path_start:path_end]
+        dirs = path.strip('/').split('/')
+
+    return dirs, clean_url, file_extension
+
+
+# 并行解析URL并构建Trie
+def trie_url_parser(url_lists):
+    root = TrieNode()
+
+    def process_url(url):
+        dirs, clean_url, file_extension = trie_url_preprocess(url)
+        data = (clean_url, file_extension)
+        insert_into_trie(root, dirs, data)
+
+    # 使用线程池进行并行处理
+    for url in url_lists:
+        process_url(url)
+
+    return root
+
+if __name__ == "__main__":
+    path = "633694460986785795.txt"
+    path = "e2393619cb65490fbd6932e943a363fc.txt"
+    path = "4d9f04de7dec49008faad35d85f28041.txt"
+    # path = "7e0a4faa0d0649918ae3e94ef34b94af.txt"
+    path="urls.txt"
+    url_path = URL_TXT_ROOT
+    url_path = "./"
+    with open(os.path.join(url_path, path), 'r', encoding='utf-8') as f:
+        url_lists = f.readlines()
+        URL_LIST = url_lists
+        # print(modified_url_parser(url_lists, 10))3
+        import timeit
+        from UrlGenerator import generate_line
+        trie_dir_structure = trie_url_parser(url_lists)
+        dir_structure_1 = modified_url_parser(url_lists)
+        dir_structure_2 = url_parser(url_lists)
+
+        # url_lists = generate_line(30)
+        TIMES = 50
+
+        elapsed_time = timeit.timeit(lambda: url_parser(url_lists),
+                                     number=TIMES) / TIMES  # 运行100次
+        print(f"Average execution time per run: {elapsed_time :.6f} seconds")
+
+        elapsed_time_m = timeit.timeit(lambda: trie_url_parser(url_lists),
+                                       number=TIMES) / TIMES  # 运行100次
+        print(f"Average execution time per run: {elapsed_time_m :.6f} seconds")
+        print(f"Execution time reduced per run: {(elapsed_time - elapsed_time_m) / elapsed_time :.2%} seconds")

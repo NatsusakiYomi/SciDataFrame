@@ -1,11 +1,14 @@
 import uuid
+
+from pyarrow.jvm import schema
+
 from utils.Check import Level
 import pyarrow as pa
 from pyarrow import flight as fl
 from arrow_flight import Client
 
 SCHEMA = pa.schema([
-    pa.field('text', pa.string()),
+    pa.field('text', pa.binary()),
     pa.field('image', pa.binary()),
     pa.field('binary', pa.binary())],
 )
@@ -13,17 +16,19 @@ SCHEMA = pa.schema([
 
 class MyDataFrame:
 
-    def __init__(self, schema=None, nbytes=None, level=Level.FOLDER, data=None, client=None, **kwargs):
+    def __init__(self, dataset_id, schema=None, nbytes=None, level=Level.FOLDER, data=None, client=None, **kwargs):
         self.id = uuid.uuid4()
         self.schema = schema
         self.nbytes = nbytes
         self.data = data
         self.batch_size = kwargs.get('batch_size', None)
         self.client = Client() if client is None \
-            else kwargs.get('client', None) if len(kwargs) == 1 else None
+            else client
         self.counter = 0
         self.reader = None
         self.level = level
+        self.dataset_id = dataset_id
+        self.is_iterate =kwargs.get('is_iterate', None)
         self.load_kwargs = kwargs
 
     def concat(self, obj):
@@ -41,39 +46,48 @@ class MyDataFrame:
                 break  # 碰到第一个不超过目标 depth 的行时停止
         return df.loc[filtered_rows]
 
+    def _get_all_paths(self):
+        return ','.join(self.schema['name'].tolist())
+
+    def filter(self, pattern):
+        filtered_schema = self.schema[self.schema['name'].str.contains(pattern, regex=True)]
+        df = MyDataFrame(dataset_id=self.dataset_id, schema=filtered_schema,
+                         level=Level.FOLDER,
+                         client=self.client,
+                         **self.load_kwargs)
+        return df
+
+
     def open(self, name):
         slice = self.schema[self.schema["name"] == name]
         try:
             level = Level(slice.iloc[0]['type'])
             index = slice.index[0]
-            df = MyDataFrame(schema=self._filter_depth_rows(self.schema, index)
+            df = MyDataFrame(dataset_id=self.dataset_id,schema=self._filter_depth_rows(self.schema, index)
             if level == Level.FOLDER else slice,
                                level=level,
-                               client=self.client)
+                               client=self.client,
+                             **self.load_kwargs)
             if level == Level.FILE:
-                df.flat_open(**self.load_kwargs)
+                df.flat_open(name)
             return df
         except IndexError as e:
             print("Dirs/files not found, please retry.")
             return self
 
-    def get_schema(self, dataset_id):
-        self.schema = self.client.get_schema(dataset_id).to_pandas()
+    def get_schema(self):
+        self.schema = self.client.get_schema(self.dataset_id).to_pandas()
         return self.schema
 
-    # def filter(self, paths):
-    #     action = fl.Action("put_folder_path", paths.encode("utf-8"))
-    #     self.client.fl_client.do_action(action)
-    #     return "Files Filtered!"
-
-    def flat_open(self, **kwargs):
-        self.client.load_init(**kwargs)
-        self.batch_size = kwargs.get('batch_size', None)
-        action = fl.Action("put_folder_path", self.schema.iloc[0]['name'].encode("utf-8"))
+    def flat_open(self, paths=None):
+        self.client.load_init(**self.load_kwargs)
+        self.is_iterate = self.load_kwargs.get('is_iterate', None)
+        paths = self._get_all_paths() if paths is None else paths
+        action = fl.Action("put_folder_path", paths.encode("utf-8"))
         self.client.fl_client.do_action(action)
-        self.reader = self.client.load(self.level)
-        if self.batch_size is None:
-            self.concat(self.reader)
+        self.reader = self.client.flat_open(self.level)
+        if not self.is_iterate:
+                self.concat(self.reader)
         self.client.close()
 
     def iter_to_instance(self):
@@ -84,12 +98,13 @@ class MyDataFrame:
         return iter(self)
 
     def __iter__(self):
-        if self.batch_size is not None:
+        if self.is_iterate:
             for batch in self.reader:
+                # print(batch.data.schema)
                 self.concat(pa.Table.from_batches([batch.data]))
                 print(
                     f'Row {self.counter * self.batch_size + 1} to {(self.counter + 1) * self.batch_size} received: {batch.data.nbytes} bytes')
-                yield MyDataFrame(data=pa.Table.from_batches([batch.data]),client=self.client)
+                yield MyDataFrame(dataset_id=self.dataset_id,data=pa.Table.from_batches([batch.data]),client=self.client)
                 self.counter += 1
         else:
             raise NotImplementedError('Batch size not implemented yet')

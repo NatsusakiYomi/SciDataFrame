@@ -122,6 +122,7 @@ if __name__ == '__main__':
     PATH = '533223505102110720.txt'
     # PATH = "new.txt"
     PATH = "2gb.txt"
+    read_url_from_txt("7e0a4faa0d0649918ae3e94ef34b94af.txt")
     #
     # PATH = 'b6a1d3f42b014fa9ae9cce04679a5e0f.txt'
     # dataset = load_dataset("mc4", "en", streaming=True, split="train")

@@ -27,6 +27,6 @@ schema = df.get_schema(dataset_id)
 # df = df.open("out")
 # df = df.open(dataset_path)
 # 加载数据
-df.load(**kwargs)
+df.flat_open()
 for i in df:
     pass
