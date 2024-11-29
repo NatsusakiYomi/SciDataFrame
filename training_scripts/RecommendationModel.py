@@ -3,6 +3,7 @@ from lightfm import LightFM
 from lightfm.evaluation import precision_at_k
 from scipy.sparse import coo_matrix
 import numpy as np
+import pyarrow
 
 def RecommendationModel(df):
     df = df.data.to_pandas()

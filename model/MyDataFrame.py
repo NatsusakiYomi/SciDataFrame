@@ -16,7 +16,7 @@ SCHEMA = pa.schema([
 
 class MyDataFrame:
 
-    def __init__(self, dataset_id, schema=None, nbytes=None, level=Level.FOLDER, data=None, client=None, **kwargs):
+    def __init__(self, dataset_id=None, schema=None, nbytes=None, level=Level.FOLDER, data=None, client=None, **kwargs):
         self.id = uuid.uuid4()
         self.schema = schema
         self.nbytes = nbytes

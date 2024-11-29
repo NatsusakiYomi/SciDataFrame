@@ -1,16 +1,29 @@
 # install.packages("reticulate")
 library(R6)
 library(reticulate)
+# py_install("pyarrow")
+# py_install("pandas")
+
+library(ggplot2)
+library(dplyr)
+
+pa <- reticulate::import("pyarrow")
+pandas <- reticulate::import("pandas")
+fl <- pa$flight
+source("ROperator.R")
+source("RClient.R")
+source("RServer.R")
+# source("MyDataFrame.R")
+
 # library(arrow)
 # use_python("C:\\Users\\Yomi\\OneDrive - University of California\\文档\\.virtualenvs\\myenv\\Scripts\\python.exe")
 # install.packages("arrow.flight")
 # install_pyarrow()
-# py_install("pyarrow")
-# py_install("pandas")
-pa <- reticulate::import("pyarrow")
-fl <- pa$flight
+# load_flight_server()
+# flight_connect()
 
-source("client.R")
+
+source("RClient.R")
 
 # 创建一个R6类，表示数据结构
 MyDataFrame <- R6Class(
@@ -25,13 +38,14 @@ MyDataFrame <- R6Class(
     batch_size = NULL,
     reader = NULL,
     dataset_id = NULL,
+    is_preprocess=NULL,
     # 初始化方法，设置 schema，data 和 client
-    initialize = function(schema=NULL,data=NULL, level=NULL, client=NULL, streaming=NULL, batch_size=NULL, dataset_id=NULL) {
+    initialize = function(schema=NULL,data=NULL, level=NULL, client=NULL, streaming=NULL, batch_size=NULL, dataset_id=NULL,port=8815, is_preprocess=NULL) {
       self$schema <- schema
       self$data <- data
       self$level <- level
       if (is.null(client)) {
-        self$client <- Client$new()  # 创建 Client 实例
+        self$client <- RClient$new(port=port)  # 创建 Client 实例
       } else {
         self$client <- client  # 使用传入的 client
       } # 设置 Arrow Flight client
@@ -39,6 +53,7 @@ MyDataFrame <- R6Class(
       self$batch_size <- batch_size
       self$reader <- NULL
       self$dataset_id <- dataset_id
+      self$is_preprocess<-is_preprocess
     },
 
     # get_schema 方法，调用 client 的 get_schema
@@ -48,7 +63,7 @@ MyDataFrame <- R6Class(
       }
       # 调用 client 的 get_schema 方法（假设 Flight Client 提供该方法）
       tryCatch({
-        schema <- self$client$get_schema(self$dataset_id)$to_pandas()  # 假设这是正确的调用方式
+        schema <- self$client$get_schema(self$dataset_id)  # 假设这是正确的调用方式
         self$schema <- schema  # 设置 schema
         return(self$schema)
       }, error = function(e) {
@@ -84,8 +99,17 @@ MyDataFrame <- R6Class(
       return(df[filtered_rows, ])
     },
     
-    flat_open = function(name) {
-      self$reader <- self$client$flat_open(name,self$streaming,self$batch_size)
+    get_all_paths = function() {
+      return(paste(self$schema$name, collapse = ","))
+    },
+    
+    flat_open = function(name=NULL) {
+      paths <- if (is.null(name)) {
+        self$get_all_paths()
+      } else {
+        name
+      }
+      self$reader <- self$client$flat_open(paths,self$streaming,self$batch_size,self$is_preprocess)
       if (is.null(self$batch_size)) {
       #   for (chunk in reticulate::iterate(self$reader)) {
           self$concat(self$reader)

@@ -1,2 +1,2 @@
 from .client import Client
-from .downstreamClientServer import DownstreamClientServer
+from .DownstreamFlightClient import DownstreamFlightClient
