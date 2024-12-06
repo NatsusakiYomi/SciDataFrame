@@ -22,7 +22,7 @@ kwargs = {
 # 根据配置新建DataFrame
 df = MyDataFrame()
 # 获得数据集schema
-schema = df.get_schema(dataset_id)
+schema = df.get_schema()
 # 打开文件（夹）
 # df = df.open("out")
 # df = df.open(dataset_path)

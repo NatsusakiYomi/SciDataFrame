@@ -180,7 +180,7 @@ if __name__ == "__main__":
         dir_structure_1 = modified_url_parser(url_lists, 10)
         dir_structure_2 = url_parser(url_lists)
 
-        url_lists = generate_line(10)
+        # url_lists = generate_line(10)
         TIMES = 100
 
         elapsed_time = timeit.timeit(lambda: url_parser(url_lists),

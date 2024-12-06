@@ -20,5 +20,9 @@ class Level(Enum):
     FILE = "file"
     DATA = "data"
 
+class Source(Enum):
+    SCIDB="SciDB"
+    GSA="GSA"
+
 class Path(Enum):
     PRORJECT_PATH = os.path.abspath(os.path.join(os.path.dirname(os.path.abspath(__file__)), '..'))

@@ -16,13 +16,13 @@ SCHEMA = pa.schema([
 
 class MyDataFrame:
 
-    def __init__(self, dataset_id=None, schema=None, nbytes=None, level=Level.FOLDER, data=None, client=None, **kwargs):
+    def __init__(self, dataset_id=None, schema=None, nbytes=None, level=Level.FOLDER, data=None, client=None, address="127.0.0.1", port=8815, **kwargs):
         self.id = uuid.uuid4()
         self.schema = schema
         self.nbytes = nbytes
         self.data = data
         self.batch_size = kwargs.get('batch_size', None)
-        self.client = Client() if client is None \
+        self.client = Client(address,port) if client is None \
             else client
         self.counter = 0
         self.reader = None

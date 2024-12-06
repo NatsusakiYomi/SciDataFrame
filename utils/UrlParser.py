@@ -4,10 +4,20 @@ from urllib.parse import quote
 API_KEY='&api_key=bfd4d663cbf0e5042b9f26fcfb29d71a'
 
 def url_parser(url_lists):
+    sample=url_lists[0]
+    print(sample)
+    if "dap.ceda.ac.uk" in sample:
+        pass
+        # return ceda_url_parser(url_lists)
+    elif "download.cncb.ac.cn" in sample:
+        return gsa_url_parser(url_lists)
+    else:
+        return scidb_url_parser(url_lists)
+def scidb_url_parser(url_lists):
     dir_structure = {}
     splits = {}
-    clean_urls=[]
-    file_extensions=[]
+    clean_urls = []
+    file_extensions = []
     for url in url_lists:
         clean_url = url.strip()
         file_extension = os.path.splitext(clean_url)[1][1:].lower()
@@ -24,7 +34,7 @@ def url_parser(url_lists):
 
         split = os.path.join(*dirs[:-1])
         if split not in splits:
-            splits[split]=[]
+            splits[split] = []
         splits[split].append(clean_url)
 
         current_level = dir_structure
@@ -32,14 +42,47 @@ def url_parser(url_lists):
             if dir not in current_level:
                 current_level[dir] = {}
             current_level = current_level[dir]
-        current_level[dirs[-1]] = (clean_url,file_extension)
-
+        current_level[dirs[-1]] = (clean_url, file_extension)
 
         clean_urls.append(clean_url)
         file_extensions.append(file_extension)
 
     return dir_structure
 
+def gsa_url_parser(url_lists):
+    dir_structure = {}
+    splits = {}
+    clean_urls = []
+    file_extensions = []
+    for url in url_lists:
+        clean_url = url.strip()
+        file_extension = os.path.splitext(clean_url)[1][1:].lower()
+        # clean_url = quote(clean_url, safe='/:=&?#+!,')
+        parts = clean_url.strip().split('&')
+        filepath_part = None
+        # for part in parts:
+        #     if part.startswith("path="):
+        #         filepath_part = part
+        # if filepath_part:
+            # filepath = filepath_part.split('=')[1]
+            # filename = filename_part.split('=')[1]
+            # split = filepath.rsplit('/', 1)[0]
+        # dirs = parts.strip('/').split('/')
+        # else:
+            # split = parts[0].rsplit('/', 1)[0]
+        dirs = parts[0].split('/')[3:]
+
+        current_level = dir_structure
+        for dir in dirs[:-1]:
+            if dir not in current_level:
+                current_level[dir] = {}
+            current_level = current_level[dir]
+        current_level[dirs[-1]] = (clean_url, file_extension)
+
+        clean_urls.append(clean_url)
+        file_extensions.append(file_extension)
+
+    return dir_structure
 
 def filter_url_from_index(directory_structure, target_dir):
     all_urls = []

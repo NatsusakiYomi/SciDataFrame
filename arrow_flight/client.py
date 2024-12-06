@@ -13,7 +13,7 @@ from torch.package import analyze
 # from model import MyDataFrame
 import pickle
 from training_scripts import *
-from utils import TrainingTask, Level
+from utils import TrainingTask, Level, Source
 import time
 # server = grpc.server(..., options=[('grpc.so_reuseport', 1)])
 # server.add_insecure_port('[::]:8815')  # 监听所有接口，包括 IPv6
@@ -26,10 +26,10 @@ import numpy as np
 # flight = client.get_flight_info(upload_descriptor)
 # descriptor = flight.descriptor
 class Client():
-    def __init__(self):
+    def __init__(self,address="127.0.0.1",port=8815):
         start_train = False
 
-        self.fl_client = fl.connect("grpc://127.0.0.1:8815")
+        self.fl_client = fl.connect("grpc://"+address+":"+str(port))
 
 
     def load_init(self,  is_analyze, is_preprocess, is_get_dataset_str, is_streaming, task,
