@@ -3,7 +3,7 @@ import tempfile
 from io import BytesIO
 import pyarrow as pa
 import requests
-from ParserInterface import ParserInterface
+from utils.Parser import ParserInterface
 import numpy as np
 import pandas as pd
 from osgeo import gdal
@@ -40,6 +40,7 @@ class TifParser(ParserInterface):
             'columns_meta': "width value, height value, bands value, data bytes, geotrans info, projection info",
             'shape': ','.join(map(str, t.shape)),
         })
+        del dataset
         os.remove(temp_file_path)
         return t
 
@@ -48,3 +49,12 @@ def array_to_bytes(x: np.ndarray) -> bytes:
     np_bytes = BytesIO()
     np.save(np_bytes, x, allow_pickle=True)
     return np_bytes.getvalue()
+
+if __name__=="__main__":
+    from arrow_flight import MyFlightServer,char_det
+    file_url="https://download.scidb.cn/download?fileId=7b76c5de73930fb64856dd879b5f3606&path=/V1/SIDT1质粒载体构建测序数据/images/ndvi_2000.tif&fileName=ndvi_2000.tif"+"&api_key=bfd4d663cbf0e5042b9f26fcfb29d71a"
+    # char_det(file_url)
+
+    # print(encoded_url)
+    t=TifParser.parse(MyFlightServer('grpc://127.0.0.1:8815'),file_url=file_url)
+    print(t)

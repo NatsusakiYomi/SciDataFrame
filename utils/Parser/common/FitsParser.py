@@ -2,7 +2,7 @@ import os
 import pickle
 import tempfile
 import requests
-from ParserInterface import ParserInterface
+from utils.Parser import ParserInterface
 import pyarrow as pa
 import pandas as pd
 from astropy.io import fits
@@ -43,5 +43,14 @@ class FitsParser(ParserInterface):
             'columns_meta': "hdu header bytes, hdu data bytes, hdu type",
             'shape': ','.join(map(str, t.shape)),
         })
+        hdu.close()
         os.remove(temp_file_path)
         return t
+if __name__=="__main__":
+    from arrow_flight import MyFlightServer,char_det
+    file_url="https://download.scidb.cn/download?fileId=d614d82fb31446c00878c7aeba21e34f&path=/V1/SIDT1质粒载体构建测序数据/outputs/fxt_a_11900000001_of_00_po_uf_evt_0aa.fits&fileName=fxt_a_11900000001_of_00_po_uf_evt_0aa.fits&api_key=bfd4d663cbf0e5042b9f26fcfb29d71a"
+    # char_det(file_url)
+
+    # print(encoded_url)
+    t=FitsParser.parse(MyFlightServer('grpc://127.0.0.1:8815'),file_url=file_url)
+    print(t)

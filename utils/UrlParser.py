@@ -104,14 +104,16 @@ def filter_url_from_index(directory_structure, target_dir):
             for value in structure.values():
                 if isinstance(value, tuple):
                     # 如果值是列表，收集它
-                    all_urls.append(value[0])
-                    all_exts.append(value[1])
+                    if value[0] not in all_urls:
+                        all_urls.append(value[0])
+                        all_exts.append(value[1])
                 elif isinstance(value, dict):
                     # 继续递归收集子文件夹中的URL
                     collect_urls(value)
         elif isinstance(structure, tuple):
-            all_urls.append(structure[0])
-            all_exts.append(structure[1])
+            if structure[0] not in all_urls:
+                all_urls.append(structure[0])
+                all_exts.append(structure[1])
 
     # 从顶层开始递归搜索
     for root_dir, root_structure in directory_structure.items():

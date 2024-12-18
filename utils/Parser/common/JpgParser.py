@@ -3,7 +3,7 @@ import tempfile
 import pyarrow as pa
 import requests
 from PIL import Image
-from ParserInterface import ParserInterface
+from utils.Parser import ParserInterface
 import numpy as np
 import pandas as pd
 

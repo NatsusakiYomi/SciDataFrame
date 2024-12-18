@@ -10,8 +10,8 @@ from utils import Version
 os.environ["FSSPEC_TIMEOUT"] = "36000"  # 设置超时时间为1200秒
 os.environ["HF_DATA SETS_NUM_THREADS"] = "5"
 # 修改端口号
-os.environ['HTTP_PROXY'] = 'http://127.0.0.1:7890'
-os.environ['HTTPS_PROXY'] = 'http://127.0.0.1:7890'
+# os.environ['HTTP_PROXY'] = 'http://127.0.0.1:7890'
+# os.environ['HTTPS_PROXY'] = 'http://127.0.0.1:7890'
 OPTION = 'TEMP'
 OPTION = 'IN-MEMORY'
 REMOTE = True
@@ -63,6 +63,8 @@ def load_scidb_dataset(dir_structure, string, streaming=False):
     target_dirs = string.split(',')
     print(f"Streaming: {streaming}")
     urls_all, file_extensions = filter_url_from_index(dir_structure, target_dirs)
+    print(urls_all  )
+    print(file_extensions)
     kwargs={
         "path":LOCAL_SCRIPT_PATH,
         "name": "custom_config",
@@ -122,6 +124,8 @@ if __name__ == '__main__':
     PATH = '533223505102110720.txt'
     # PATH = "new.txt"
     PATH = "2gb.txt"
+    PATH = "8621e1b39c9a4acd87fee2be516d22ce.txt"
+    load_sciencedb(PATH, streaming=False)
     read_url_from_txt("7e0a4faa0d0649918ae3e94ef34b94af.txt")
     read_url_from_txt("GSA_url.txt")
     #

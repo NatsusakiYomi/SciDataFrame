@@ -11,6 +11,7 @@ class UnstructuredUtils:
             print("file path is none")
             return
         print("file_path=", file_path)
+        f=open(file_path, 'rb')
         file_name, mime_type = UnstructuredUtils.retrieve_file_name_and_mime_type(file_path)
         print("file_name=", file_name, ", mime_type=", mime_type)
         if file_name is None or mime_type is None:
@@ -22,9 +23,10 @@ class UnstructuredUtils:
             'unstructured-api-key': 'KmLJJXr3yQ0hB1tbgTM9ergPsyA535'
         }
         files = [
-            ('files', (file_name, open(file_path, 'rb'), mime_type))
+            ('files', (file_name,f , mime_type))
         ]
         response = requests.post(url, headers=headers, files=files, timeout=60)
+        f.close()
         os.remove(file_path)
         if response.status_code != 200:
             print("unstructured api error, code=", response.status_code, ", content=", response.content)

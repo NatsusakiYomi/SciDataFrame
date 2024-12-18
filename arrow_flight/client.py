@@ -49,7 +49,7 @@ class Client():
         self.dataset_id = dataset_id
         action = fl.Action("get_schema", self.dataset_id.encode("utf-8"))
         self.fl_client.do_action(action)
-        schema_results = self.fl_client.do_action(action)
+        schema_results = self.fl_client.do_action(action,pyarrow.flight.FlightCallOptions(timeout=60))
         schema = None
         # 处理返回的 schema
         for schema_bytes in schema_results:
@@ -64,6 +64,7 @@ class Client():
         # 进行数值特征分析
         ticket = fl.Ticket("".encode("utf-8"))
         if level==Level.FILE:
+
             if self.is_analyze:
                 action = fl.Action("numerical_analysis", "True".encode("utf-8"))
                 # self.client.do_action(action)
@@ -92,10 +93,12 @@ class Client():
                 action = fl.Action("recommendation_preprocess", "False".encode("utf-8"))
                 results = self.fl_client.do_action(action)
 
-            # 进行streaming
             if self.is_get_dataset_str:
                 action = fl.Action("get_dataset_str", "True".encode("utf-8"))
                 results = self.fl_client.do_action(action)
+
+            action = fl.Action("parse_open", "True".encode("utf-8"))
+            results = self.fl_client.do_action(action)
 
         if self.is_iterate:
             action = fl.Action("batch_size", str(self.batch_size).encode("utf-8"))
@@ -112,6 +115,7 @@ class Client():
         reader = self.fl_client.do_get(ticket)
         if not self.is_iterate:
             reader = reader.read_all()
+        print(reader)
         return reader
 
     def close(self):

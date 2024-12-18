@@ -1,4 +1,4 @@
-from ParserInterface import ParserInterface
+from utils.Parser import ParserInterface
 import pyarrow as pa
 import pandas as pd
 

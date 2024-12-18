@@ -5,7 +5,7 @@ from io import BytesIO
 import numpy as np
 import pyarrow as pa
 import requests
-from ParserInterface import ParserInterface
+from utils.Parser import ParserInterface
 import xarray as xr
 import pandas as pd
 
@@ -58,6 +58,7 @@ class NcParser(ParserInterface):
             df.loc[df.index == name, 'dimensions'] = ','.join(map(str, variable_dim_dict[name]))
             df.loc[df.index == name, 'description'] = str(variable_desc_dict[name])
             df.loc[df.index == name, 'unit'] = str(variable_unit_dict[name])
+        ds.close()
         os.remove(temp_file_path)
         df = df.reset_index()
         t = pa.Table.from_pandas(df)
@@ -77,3 +78,6 @@ def array_to_bytes(x: np.ndarray) -> bytes:
     np_bytes = BytesIO()
     np.save(np_bytes, x, allow_pickle=True)
     return np_bytes.getvalue()
+if __name__=="__main__":
+    nc=NcParser.parse(NcParser,file_url="https://download.scidb.cn/download?fileId=5bcb7621c29286bb9847b773614c2218&path=/V1/SIDT1质粒载体构建测序数据/outputs/HDF_MPL_4202_202103230343.hdf&fileName=HDF_MPL_4202_202103230343.hdf&api_key=bfd4d663cbf0e5042b9f26fcfb29d71a")
+    nc=None

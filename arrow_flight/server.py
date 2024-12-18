@@ -4,9 +4,13 @@ import io
 
 import datasets
 
+
+
 sys.path.append('C:\\Users\\Yomi\\PycharmProjects\\SDB2')
 
-from utils import Version
+from utils import Version, filter_url_from_index, Parser
+from utils.Parser import *
+
 import pyarrow as pa
 import pyarrow
 from pyarrow.csv import read_csv, ReadOptions
@@ -61,13 +65,14 @@ class MyFlightServer(fl.FlightServerBase):
         self.dataset_type = None
         # 如果是大于等于1的整型，则按需供给，否则一次性供给
         self.batch_size = None
+        self.location=location
 
     def _make_flight_info(self, dataset):
         schema = SCHEMA_TABLE
         descriptor = pa.flight.FlightDescriptor.for_path(
             dataset.encode('utf-8')
         )
-        endpoints = [pa.flight.FlightEndpoint(dataset, ["grpc://0.0.0.0:8815"])]
+        endpoints = [pa.flight.FlightEndpoint(dataset, [self.location])]
         return pa.flight.FlightInfo(schema,
                                     descriptor,
                                     endpoints,
@@ -107,7 +112,7 @@ class MyFlightServer(fl.FlightServerBase):
             self.batch_size = int(action.body.to_pybytes().decode('utf-8'))
         elif action.type == "numerical_analysis":
             self.numerical_analysis = eval(action.body.to_pybytes().decode('utf-8'))
-            self.dataset_type = 'num'
+            self.dataset_type = 'num' if self.numerical_analysis else None
             if self.numerical_analysis:
                 self.streaming = False
                 self.get_dataset(self.dataset_type)
@@ -116,7 +121,7 @@ class MyFlightServer(fl.FlightServerBase):
             # return []
         elif action.type == "recommendation_preprocess":
             self.preprocess = eval(action.body.to_pybytes().decode('utf-8'))
-            self.dataset_type = 'num'
+            self.dataset_type = 'num' if self.preprocess else None
             if self.preprocess:
                 self.recommendation_preprocess()
                 return [pickle.dumps("Data Preprocessed!")]
@@ -127,7 +132,10 @@ class MyFlightServer(fl.FlightServerBase):
             self.dataset_type = 'str'
             self.get_dataset(self.dataset_type)
         elif action.type == "img_preprocess":
+            # TODO: 图像预处理
             pass
+        elif action.type == "parse_open":
+            self.parse_open()
         else:
             raise NotImplementedError
 
@@ -173,15 +181,13 @@ class MyFlightServer(fl.FlightServerBase):
                 yield ds.slice(start, end - start)
 
         def merge_dict_to_table(it_ds):
-            merged_dict={}
+            merged_dict = {}
             for example in it_ds:
                 for key, value in example.items():
                     if key not in merged_dict:
                         merged_dict[key] = []  # 初始化为列表
                     merged_dict[key].append(value)
             return pa.table(merged_dict)
-
-
 
         def is_iter_batch(ds):
             if self.batch_size is not None:
@@ -190,7 +196,8 @@ class MyFlightServer(fl.FlightServerBase):
                 if not isinstance(ds, pyarrow.Table):
                     if not self.streaming:
                         return fl.GeneratorStream(SCHEMA_TABLE,
-                                                  generate_table_batches(self.batch_size, ds['train'].data.table if Version.IS_DATASETS_OUTDATED.value else ds.data.table))
+                                                  generate_table_batches(self.batch_size, ds[
+                                                      'train'].data.table if Version.IS_DATASETS_OUTDATED.value else ds.data.table))
                     return fl.GeneratorStream(SCHEMA_TABLE, generate_dataset_batches(self.batch_size, ds))
                 else:
                     return fl.GeneratorStream(ds.schema, generate_table_batches(self.batch_size, ds))
@@ -201,19 +208,20 @@ class MyFlightServer(fl.FlightServerBase):
                 if not isinstance(ds, pyarrow.Table):
                     if isinstance(ds, IterableDataset):
                         return fl.RecordBatchStream(merge_dict_to_table(ds))
-                    return fl.RecordBatchStream(ds['train'].data.table if Version.IS_DATASETS_OUTDATED.value else ds.data.table)
+                    return fl.RecordBatchStream(
+                        ds['train'].data.table if Version.IS_DATASETS_OUTDATED.value else ds.data.table)
                 else:
                     print("一次性供给Table")
                     return fl.RecordBatchStream(ds)
 
         if dataset is not None:
+            print(self.dataset_type)
             if self.dataset_type == 'num':
                 return is_iter_batch(self.nparray_to_table(self.dataset))
             return is_iter_batch(self.dataset)
-
         dataset = load_scidb_dataset(
             self.dir_structure, dirs_string, streaming=not self.numerical_analysis and self.streaming)
-        # print(dataset)
+        print(dataset)
         return is_iter_batch(dataset)
 
         # print(dataset)
@@ -221,12 +229,60 @@ class MyFlightServer(fl.FlightServerBase):
     def action_bool(self, action):
         return eval(action.body.to_pybytes().decode('utf-8'))
 
+    def parse_open(self):
+        print("Parsing and opening dataset...")
+        target_dirs = self.folder_path.split(',')
+        urls_all, file_extensions = filter_url_from_index(self.dir_structure, target_dirs)
+        # print(urls_all,file_extensions)
+        file_url = urls_all[0]
+        file_format = file_extensions[0]
+        # if file_format == "structured":
+        #     arrow_df = StructuredParser.parse(self, file_url)
+        if file_format == "csv":
+            arrow_df = CsvParser.parse(self, file_url)
+        elif file_format in {"xlsx", "xls", "xlsm", "xlsb"}:
+            arrow_df = ExcelParser.parse(self, file_url)
+        elif file_format == "json":
+            arrow_df = JsonParser.parse(self, file_url)
+        elif file_format == "pdf":
+            arrow_df = PdfParser.parse(self, file_url)
+        elif file_format in {"doc", "docx"}:
+            arrow_df = DocxParser.parse(self, file_url)
+        elif file_format in {"ppt", "pptx"}:
+            arrow_df = PptxParser.parse(self, file_url)
+        elif file_format == "md":
+            arrow_df = MdParser.parse(self, file_url)
+        elif file_format in {"jpg", "jpeg"}:
+            arrow_df = JpgParser.parse(self, file_url)
+        elif file_format in {"png", "https://www.iana.org/assignments/media-types/image_png"}:
+            arrow_df = PngParser.parse(self, file_url)
+        elif file_format == "bmp":
+            arrow_df = BmpParser.parse(self, file_url)
+        elif file_format == "gif":
+            arrow_df = GifParser.parse(self, file_url)
+        elif file_format in {"nc", "nc4", "hdf", "hdf5"}:
+            arrow_df = NcParser.parse(self, file_url)
+        elif file_format in {'tif', 'tiff'}:
+            arrow_df = TifParser.parse(self, file_url)
+        elif file_format in {"html", "h5"}:
+            arrow_df = HtmlParser.parse(self, file_url)
+        elif file_format == "fits":
+            arrow_df = FitsParser.parse(self, file_url)
+        elif file_format == "txt":
+            arrow_df = TxtParser.parse(self, file_url)
+        elif file_format == "xml":
+            arrow_df = XmlParser.parse(self, file_url)
+        else:
+            arrow_df = None
+        print(arrow_df.schema)
+        self.dataset=arrow_df
+
     def get_dataset(self, type):
         dataset = load_scidb_dataset(self.dir_structure, self.folder_path, streaming=self.streaming)
         dataset_table = None
         # print(dataset)
         if type == 'num' or type == 'str':
-            table=dataset['train'].data.table if Version.IS_DATASETS_OUTDATED.value else dataset.data.table
+            table = dataset['train'].data.table if Version.IS_DATASETS_OUTDATED.value else dataset.data.table
             text_binary = table['text'][0].as_py()
             # print(text_binary)
             # print(text_binary)
@@ -328,4 +384,3 @@ class MyFlightServer(fl.FlightServerBase):
 if __name__ == "__main__":
     server = MyFlightServer('grpc://127.0.0.1:8815')
     server.serve()
-

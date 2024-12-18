@@ -1,5 +1,6 @@
 import uuid
 
+from networkx import is_pseudographical
 from pyarrow.jvm import schema
 
 from utils.Check import Level
@@ -46,8 +47,12 @@ class MyDataFrame:
                 break  # 碰到第一个不超过目标 depth 的行时停止
         return df.loc[filtered_rows]
 
+    def is_paths_list_a_file(self, paths_list):
+        return Level.FILE if len(paths_list)==1 else Level.FOLDER
+
     def _get_all_paths(self):
-        return ','.join(self.schema['name'].tolist())
+        paths_list=self.schema['name'].tolist()
+        return ','.join(paths_list),self.is_paths_list_a_file(paths_list)
 
     def filter(self, pattern):
         filtered_schema = self.schema[self.schema['name'].str.contains(pattern, regex=True)]
@@ -80,15 +85,17 @@ class MyDataFrame:
         return self.schema
 
     def flat_open(self, paths=None):
+        print("file level:", self.level)
         self.client.load_init(**self.load_kwargs)
         self.is_iterate = self.load_kwargs.get('is_iterate', None)
-        paths = self._get_all_paths() if paths is None else paths
+        paths,level = self._get_all_paths() if paths is None else paths,self.is_paths_list_a_file(paths.split(","))
         action = fl.Action("put_folder_path", paths.encode("utf-8"))
+        print("file level:",level)
         self.client.fl_client.do_action(action)
-        self.reader = self.client.flat_open(self.level)
+        self.reader = self.client.flat_open(level)
         if not self.is_iterate:
-                self.concat(self.reader)
-        self.client.close()
+                self.data=self.reader
+        # self.client.close()
 
     def iter_to_instance(self):
         for example in self.reader:

@@ -3,7 +3,7 @@ import tempfile
 import pyarrow as pa
 import requests
 from PIL import Image
-from ParserInterface import ParserInterface
+from utils.Parser import ParserInterface
 import numpy as np
 import pandas as pd
 
@@ -37,5 +37,15 @@ class BmpParser(ParserInterface):
             'columns_meta': "pixel y, pixel x, RED, GREEN, BLUE",
             'shape': ','.join(map(str, t.shape))
         })
+        image.close()
         os.remove(temp_file_path)
         return t
+
+if __name__=="__main__":
+    from arrow_flight import MyFlightServer,char_det
+    file_url="https://download.scidb.cn/download?fileId=d012bb73f79404561c70b464bc37d84a&path=/V1/SIDT1质粒载体构建测序数据/images/HNeph_DrySCA.bmp&fileName=HNeph_DrySCA.bmp"+"&api_key=bfd4d663cbf0e5042b9f26fcfb29d71a"
+    # char_det(file_url)
+
+    # print(encoded_url)
+    t=BmpParser.parse(MyFlightServer('grpc://127.0.0.1:8815'),file_url=file_url)
+    print(t)

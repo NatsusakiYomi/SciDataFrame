@@ -2,7 +2,7 @@ import os
 import tempfile
 from io import BytesIO
 import requests
-from ParserInterface import ParserInterface
+from utils.Parser import ParserInterface
 import pyarrow as pa
 import pandas as pd
 import numpy as np
@@ -46,3 +46,12 @@ def array_to_bytes(x: np.ndarray) -> bytes:
     np_bytes = BytesIO()
     np.save(np_bytes, x, allow_pickle=True)
     return np_bytes.getvalue()
+
+if __name__=="__main__":
+    from arrow_flight import MyFlightServer,char_det
+    file_url="https://download.scidb.cn/download?fileId=07a81294d8c2e6841f3e6ccf18f727f5&path=/V1/SIDT1质粒载体构建测序数据/documents/example-10k-1p.html&fileName=example-10k-1p.html&api_key=bfd4d663cbf0e5042b9f26fcfb29d71a"
+    # char_det(file_url)
+
+    # print(encoded_url)
+    t=HtmlTableParser.parse(MyFlightServer('grpc://127.0.0.1:8815'),file_url=file_url)
+    print(t)

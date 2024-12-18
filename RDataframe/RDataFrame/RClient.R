@@ -5,7 +5,7 @@ library(arrow)
 # use_python("C:\\Users\\Yomi\\.conda\\envs\\SCI2DB_new\\python.exe")
 # install.packages("arrow.flight")
 # install_pyarrow()
-py_install("pyarrow")
+# py_install("pyarrow")
 pa <- reticulate::import("pyarrow")
 fl <- pa$flight
 
