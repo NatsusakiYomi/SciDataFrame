@@ -1,7 +1,6 @@
 import uuid
 
-from networkx import is_pseudographical
-from pyarrow.jvm import schema
+import pandas as pd
 
 from utils.Check import Level
 import pyarrow as pa
@@ -32,7 +31,19 @@ class MyDataFrame:
         self.is_iterate =kwargs.get('is_iterate', None)
         self.load_kwargs = kwargs
 
-    def concat(self, obj):
+    def to_pandas(self):
+        try:
+            return self.data.to_pandas()
+        except:
+            print("Data can't be converted to pandas dataframe.")
+
+    def to_numpy(self):
+        try:
+            return self.to_pandas().to_numpy()
+        except:
+            print("Data can't be converted to numpy array.")
+
+    def data_concat(self, obj):
         self.data = pa.concat_tables([self.data, obj]) if self.data else obj
 
     def _filter_depth_rows(self, df, index):
@@ -47,8 +58,25 @@ class MyDataFrame:
                 break  # 碰到第一个不超过目标 depth 的行时停止
         return df.loc[filtered_rows]
 
+    def get_slice_from_name(self, name):
+        try:
+            slice = self.schema[self.schema["name"] == name]
+            return slice
+        except IndexError as e:
+            print("Dirs/files not found, please retry.")
+            return self
+
+    def get_level_from_slice(self, slice):
+        return Level(slice.iloc[0]['type'])
+
+    def get_index_from_slice(self,slice):
+        return slice.index[0]
+
     def is_paths_list_a_file(self, paths_list):
-        return Level.FILE if len(paths_list)==1 else Level.FOLDER
+        return Level.FILE if (len(paths_list)==1
+                              and self.get_level_from_slice(
+                    self.get_slice_from_name(paths_list[0])) is
+                              Level.FILE) else Level.FOLDER
 
     def _get_all_paths(self):
         paths_list=self.schema['name'].tolist()
@@ -64,42 +92,44 @@ class MyDataFrame:
 
 
     def open(self, name):
-        slice = self.schema[self.schema["name"] == name]
-        try:
-            level = Level(slice.iloc[0]['type'])
-            index = slice.index[0]
-            df = MyDataFrame(dataset_id=self.dataset_id,schema=self._filter_depth_rows(self.schema, index)
-            if level == Level.FOLDER else slice,
-                               level=level,
-                               client=self.client,
-                             **self.load_kwargs)
-            if level == Level.FILE:
-                df.flat_open(name)
-            return df
-        except IndexError as e:
-            print("Dirs/files not found, please retry.")
-            return self
+        slice = self.get_slice_from_name(name)
+        level = self.get_level_from_slice(slice)
+        index = self.get_index_from_slice(slice)
+        df = MyDataFrame(dataset_id=self.dataset_id,schema=self._filter_depth_rows(self.schema, index)
+        if level == Level.FOLDER else slice,
+                           level=level,
+                           client=self.client,
+                         **self.load_kwargs)
+        if level == Level.FILE:
+            df.flat_open(name)
+        return df
+
 
     def get_schema(self):
         self.schema = self.client.get_schema(self.dataset_id).to_pandas()
         return self.schema
 
     def flat_open(self, paths=None):
-        print("file level:", self.level)
-        self.client.load_init(**self.load_kwargs)
-        self.is_iterate = self.load_kwargs.get('is_iterate', None)
-        paths,level = self._get_all_paths() if paths is None else paths,self.is_paths_list_a_file(paths.split(","))
-        action = fl.Action("put_folder_path", paths.encode("utf-8"))
-        print("file level:",level)
-        self.client.fl_client.do_action(action)
-        self.reader = self.client.flat_open(level)
-        if not self.is_iterate:
-                self.data=self.reader
+        try:
+
+            print("file level:", self.level)
+            self.client.load_init(**self.load_kwargs)
+            self.is_iterate = self.load_kwargs.get('is_iterate', None)
+            paths,level = self._get_all_paths() if paths is None else paths,self.is_paths_list_a_file(paths.split(","))
+            action = fl.Action("put_folder_path", paths.encode("utf-8"))
+            print("file level:",level)
+            self.client.fl_client.do_action(action)
+            self.reader = self.client.flat_open(level)
+            if not self.is_iterate:
+                    self.data=self.reader
         # self.client.close()
+        except IndexError as e:
+            print("Dirs/files not found, please retry.")
+            return self
 
     def iter_to_instance(self):
         for example in self.reader:
-            self.concat(pa.Table.from_batches([example.data]))
+            self.data_concat(pa.Table.from_batches([example.data]))
 
     def to_iterator(self):
         return iter(self)
@@ -108,7 +138,7 @@ class MyDataFrame:
         if self.is_iterate:
             for batch in self.reader:
                 # print(batch.data.schema)
-                self.concat(pa.Table.from_batches([batch.data]))
+                self.data_concat(pa.Table.from_batches([batch.data]))
                 print(
                     f'Row {self.counter * self.batch_size + 1} to {(self.counter + 1) * self.batch_size} received: {batch.data.nbytes} bytes')
                 yield MyDataFrame(dataset_id=self.dataset_id,data=pa.Table.from_batches([batch.data]),client=self.client)
