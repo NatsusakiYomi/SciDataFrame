@@ -14,7 +14,7 @@ SCHEMA = pa.schema([
 )
 
 
-class MyDataFrame:
+class SciDataFrame:
 
     def __init__(self, dataset_id=None, schema=None, nbytes=None, level=Level.FOLDER, data=None, client=None, address="127.0.0.1", port=8815, **kwargs):
         self.id = uuid.uuid4()
@@ -43,8 +43,23 @@ class MyDataFrame:
         except:
             print("Data can't be converted to numpy array.")
 
+    @classmethod
+    def concat(cls, l, r):
+        # try:
+            if l.level != r.level:
+                raise ValueError()
+            elif l.level!=Level.FOLDER:
+                l.data_concat(r)
+            l.schema_concat(r)
+            return l
+        # except Exception as e:
+        #     print("Can't concat different levels of data.")
+
+    def schema_concat(self, obj):
+        self.schema = pd.concat([self.schema, obj.schema]) if self.schema is not None else obj.schema
+
     def data_concat(self, obj):
-        self.data = pa.concat_tables([self.data, obj]) if self.data else obj
+        self.data = pa.concat_tables([self.data, obj.data]) if self.data is not None else obj.data
 
     def _filter_depth_rows(self, df, index):
         # 获取给定索引行的 'depth' 值
@@ -84,10 +99,10 @@ class MyDataFrame:
 
     def filter(self, pattern):
         filtered_schema = self.schema[self.schema['name'].str.contains(pattern, regex=True)]
-        df = MyDataFrame(dataset_id=self.dataset_id, schema=filtered_schema,
-                         level=Level.FOLDER,
-                         client=self.client,
-                         **self.load_kwargs)
+        df = SciDataFrame(dataset_id=self.dataset_id, schema=filtered_schema,
+                          level=Level.FOLDER,
+                          client=self.client,
+                          **self.load_kwargs)
         return df
 
 
@@ -95,11 +110,11 @@ class MyDataFrame:
         slice = self.get_slice_from_name(name)
         level = self.get_level_from_slice(slice)
         index = self.get_index_from_slice(slice)
-        df = MyDataFrame(dataset_id=self.dataset_id,schema=self._filter_depth_rows(self.schema, index)
+        df = SciDataFrame(dataset_id=self.dataset_id, schema=self._filter_depth_rows(self.schema, index)
         if level == Level.FOLDER else slice,
-                           level=level,
-                           client=self.client,
-                         **self.load_kwargs)
+                          level=level,
+                          client=self.client,
+                          **self.load_kwargs)
         if level == Level.FILE:
             df.flat_open(name)
         return df
@@ -117,7 +132,7 @@ class MyDataFrame:
             self.is_iterate = self.load_kwargs.get('is_iterate', None)
             paths,level = self._get_all_paths() if paths is None else paths,self.is_paths_list_a_file(paths.split(","))
             action = fl.Action("put_folder_path", paths.encode("utf-8"))
-            print("file level:",level)
+            self.level=Level.FILE
             self.client.fl_client.do_action(action)
             self.reader = self.client.flat_open(level)
             if not self.is_iterate:
@@ -129,7 +144,7 @@ class MyDataFrame:
 
     def iter_to_instance(self):
         for example in self.reader:
-            self.data_concat(pa.Table.from_batches([example.data]))
+            self.data_concat(pa.Table.from_batches([example]))
 
     def to_iterator(self):
         return iter(self)
@@ -138,10 +153,10 @@ class MyDataFrame:
         if self.is_iterate:
             for batch in self.reader:
                 # print(batch.data.schema)
-                self.data_concat(pa.Table.from_batches([batch.data]))
+                self.data_concat(pa.Table.from_batches([batch]))
                 print(
                     f'Row {self.counter * self.batch_size + 1} to {(self.counter + 1) * self.batch_size} received: {batch.data.nbytes} bytes')
-                yield MyDataFrame(dataset_id=self.dataset_id,data=pa.Table.from_batches([batch.data]),client=self.client)
+                yield SciDataFrame(dataset_id=self.dataset_id, data=pa.Table.from_batches([batch.data]), client=self.client)
                 self.counter += 1
         else:
             raise NotImplementedError('Batch size not implemented yet')

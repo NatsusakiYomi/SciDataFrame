@@ -1,7 +1,7 @@
 import sys
 
 sys.path.append('C:\\Users\\Yomi\\PycharmProjects\\SDB2')
-from model import MyDataFrame
+from model import SciDataFrame
 
 from utils import TrainingTask, Level
 
@@ -25,7 +25,7 @@ kwargs = {
     "batch_size": batch_size,
     "is_iterate": is_iterate,
 }
-df=MyDataFrame(dataset_id,**kwargs)
+df=SciDataFrame(dataset_id, **kwargs)
 df.get_schema()
 df.flat_open("HDF_MPL_4202_202103230343.hdf")
 print(df.data.schema)

@@ -3,7 +3,7 @@ from pyarrow import flight
 from arrow_flight.server import MyFlightServer
 
 
-from model import MyDataFrame
+from model import SciDataFrame
 from training_scripts import *
 from utils import TrainingTask, Level
 
@@ -53,7 +53,7 @@ def test_mydataframe():
         "batch_size": batch_size,
     }
     # 根据配置新建DataFrame
-    df = MyDataFrame()
+    df = SciDataFrame()
     # 获得数据集schema
     schema = df.get_schema(dataset_id)
     # 打开文件（夹）

@@ -2,7 +2,7 @@ from arrow_flight import DownstreamFlightClient
 # from tests.test import is_preprocess, is_streaming
 
 from training_scripts import RecommendationModel
-from model import MyDataFrame
+from model import SciDataFrame
 import asyncio
 
 
@@ -22,9 +22,9 @@ class PyOperator:
         while True:
             try:
                 # self.df = MyDataFrame(data=self.client.do_get(),client="DATA")
-                self.df = MyDataFrame(schema=self.client.do_get().to_pandas(), client=None,port=8815,
-                                      is_iterate=False, is_analyze=False,is_get_dataset_str=False,task=None,
-                                      is_preprocess=False,is_streaming=True)
+                self.df = SciDataFrame(schema=self.client.do_get().to_pandas(), client=None, port=8815,
+                                       is_iterate=False, is_analyze=False, is_get_dataset_str=False, task=None,
+                                       is_preprocess=False, is_streaming=True)
                 return self.df
             except Exception as e:
                 print(e)

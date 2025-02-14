@@ -1,1 +1,1 @@
-from .MyDataFrame import MyDataFrame
+from .SciDataFrame import SciDataFrame

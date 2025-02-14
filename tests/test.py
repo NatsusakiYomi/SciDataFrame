@@ -1,4 +1,4 @@
-from model import MyDataFrame
+from model import SciDataFrame
 from utils import TrainingTask
 
 dataset_id = 'images_test.txt'
@@ -20,7 +20,7 @@ kwargs = {
     "batch_size": batch_size,
 }
 # 根据配置新建DataFrame
-df = MyDataFrame()
+df = SciDataFrame()
 # 获得数据集schema
 schema = df.get_schema()
 # 打开文件（夹）
