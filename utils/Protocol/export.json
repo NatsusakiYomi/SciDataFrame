@@ -1,0 +1,204 @@
+{
+  "@context": {
+    "@language": "en",
+    "@vocab": "https://schema.org/",
+    "citeAs": "cr:citeAs",
+    "column": "cr:column",
+    "conformsTo": "dct:conformsTo",
+    "cr": "http://mlcommons.org/croissant/",
+    "data": {
+      "@id": "cr:data",
+      "@type": "@json"
+    },
+    "dataType": {
+      "@id": "cr:dataType",
+      "@type": "@vocab"
+    },
+    "dct": "http://purl.org/dc/terms/",
+    "examples": {
+      "@id": "cr:examples",
+      "@type": "@json"
+    },
+    "extract": "cr:extract",
+    "field": "cr:field",
+    "fileObject": "cr:fileObject",
+    "fileProperty": "cr:fileProperty",
+    "fileSet": "cr:fileSet",
+    "format": "cr:format",
+    "includes": "cr:includes",
+    "isLiveDataset": "cr:isLiveDataset",
+    "jsonPath": "cr:jsonPath",
+    "key": "cr:key",
+    "md5": "cr:md5",
+    "parentField": "cr:parentField",
+    "path": "cr:path",
+    "rai": "http://mlcommons.org/croissant/RAI/",
+    "recordSet": "cr:recordSet",
+    "references": "cr:references",
+    "regex": "cr:regex",
+    "repeated": "cr:repeated",
+    "replace": "cr:replace",
+    "sc": "https://schema.org/",
+    "separator": "cr:separator",
+    "source": "cr:source",
+    "subField": "cr:subField",
+    "transform": "cr:transform",
+    "wd": "https://www.wikidata.org/wiki/"
+  },
+  "@id": "https://doi.org/10.11922/sciencedb.44",
+  "@type": "sc:Dataset",
+  "citeAs": "@data{ 633694460835790850,\n  title        = {{Engineering database}},\n  author       = {{李英勇}},\n  year        = {{2015}},\n  month       = {{November}},\n  publisher   = {{Science Data Bank}},\n  doi         = {{10.11922/sciencedb.44}},\n  url         = {{https://doi.org/10.11922/sciencedb.44}},\n  version     = {{V1}}\n}",
+  "conditionsOfAccess": "PUBLIC",
+  "conformsTo": "http://mlcommons.org/croissant/1.0",
+  "creator": [
+    {
+      "@type": "sc:Person",
+      "affiliation": [
+        {
+          "@type": "sc:Organization",
+          "name": ""
+        }
+      ],
+      "name": "李英勇"
+    }
+  ],
+  "datePublished": "2015-11-13T08:55:12Z",
+  "description": "To ease the customer experience during the retrieval for engineering plastics database, we develop an web edition for engineering plastics database with multiple retrieval entrance. The database is able to provide a correct, time saving \u0026 effective channel during material selection phase for plastics products and mold design, as well as meeting the plastics industry develop requirement. Meanwhile, as the web edition enable the resource sharing, the user can easily navigate the database via windows browser anytime they need.",
+  "distribution": [
+    {
+      "@id": "5ffd4c5ab1a5050a86271f42",
+      "@type": "cr:FileObject",
+      "contentSize": "5502976 B",
+      "contentUrl": "https://china.scidb.cn/download?fileId=5ffd4c5ab1a5050a86271f42",
+      "description": "",
+      "encodingFormat": "application/vnd.ms-excel",
+      "md5": "9e893280bab2a960116aa908a6ed4c3c",
+      "name": "工程塑料数据库.xls"
+    }
+  ],
+  "identifier": "https://doi.org/10.11922/sciencedb.44",
+  "inLanguage": "en_US",
+  "includedInDataCatalog": {
+    "@id": "https://www.scidb.cn",
+    "@type": "sc:DataCatalog",
+    "@url": "http://www.scidb.cn",
+    "name": "Science Data Bank"
+  },
+  "keywords": [
+    "Engineering plastics",
+    " Online Edition"
+  ],
+  "license": "https://creativecommons.org/licenses/by/4.0/",
+  "name": "Engineering database",
+  "publisher": {
+    "@type": "sc:Organization",
+    "@url": "http://www.scidb.cn",
+    "name": "Science Data Bank"
+  },
+  "recordSet": [
+    {
+      "@id": "6789c1260bbd9ac7b9a81022",
+      "@type": "cr:RecordSet",
+      "filed": [
+        {
+          "@id": "6789c1260bbd9ac7b9a81022/id",
+          "@type": "cr:Field",
+          "dataType": "sc:Integer",
+          "description": "",
+          "name": "id",
+          "source": {
+            "extract": {
+              "column": "id"
+            },
+            "fileObject": {
+              "@id": "5ffd4c5ab1a5050a86271f42"
+            }
+          }
+        },
+        {
+          "@id": "6789c1260bbd9ac7b9a81022/paihao",
+          "@type": "cr:Field",
+          "dataType": "sc:Text",
+          "description": "",
+          "name": "paihao",
+          "source": {
+            "extract": {
+              "column": "paihao"
+            },
+            "fileObject": {
+              "@id": "5ffd4c5ab1a5050a86271f42"
+            }
+          }
+        },
+        {
+          "@id": "6789c1260bbd9ac7b9a81022/guojia",
+          "@type": "cr:Field",
+          "dataType": "sc:Text",
+          "description": "",
+          "name": "guojia",
+          "source": {
+            "extract": {
+              "column": "guojia"
+            },
+            "fileObject": {
+              "@id": "5ffd4c5ab1a5050a86271f42"
+            }
+          }
+        },
+        {
+          "@id": "6789c1260bbd9ac7b9a81022/guojia_eng",
+          "@type": "cr:Field",
+          "dataType": "sc:Text",
+          "description": "",
+          "name": "guojia_eng",
+          "source": {
+            "extract": {
+              "column": "guojia_eng"
+            },
+            "fileObject": {
+              "@id": "5ffd4c5ab1a5050a86271f42"
+            }
+          }
+        },
+        {
+          "@id": "6789c1260bbd9ac7b9a81022/CNTitle",
+          "@type": "cr:Field",
+          "dataType": "sc:Text",
+          "description": "",
+          "name": "CNTitle",
+          "source": {
+            "extract": {
+              "column": "CNTitle"
+            },
+            "fileObject": {
+              "@id": "5ffd4c5ab1a5050a86271f42"
+            }
+          }
+        },
+        {
+          "@id": "6789c1260bbd9ac7b9a81022/ENTitle",
+          "@type": "cr:Field",
+          "dataType": "sc:Text",
+          "description": "",
+          "name": "ENTitle",
+          "source": {
+            "extract": {
+              "column": "ENTitle"
+            },
+            "fileObject": {
+              "@id": "5ffd4c5ab1a5050a86271f42"
+            }
+          }
+        }
+      ],
+      "name": "工程塑料牌号信息"
+    }
+  ],
+  "size": {
+    "@type": "sc:QuantitativeValue",
+    "unitText": "bytes",
+    "value": 5502976
+  },
+  "url": "https://doi.org/10.11922/sciencedb.44",
+  "version": "1.0.0"
+}

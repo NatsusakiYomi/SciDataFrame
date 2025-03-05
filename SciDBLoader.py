@@ -1,4 +1,5 @@
 import os
+import json
 import tempfile
 
 from datasets import load_dataset, dataset_dict, IterableDataset
@@ -30,12 +31,24 @@ dir_path = os.makedirs(CACHE_DIR, exist_ok=True)
 URL_LIST = []
 MAX_LEN = 30
 
+def is_json_file(file_path):
+    try:
+        with open(os.path.join(URL_TXT_ROOT, file_path), 'r', encoding='utf-8') as f:
+            json.load(f)
+        return True
+    except (json.JSONDecodeError, ValueError):
+        return False
+
 
 def read_url_from_txt(path):
-    with open(os.path.join(URL_TXT_ROOT, path), 'r', encoding='utf-8') as f:
-        url_lists = f.readlines()
-        URL_LIST = url_lists
-        return url_parser(url_lists)
+    if not is_json_file(path):
+        with open(os.path.join(URL_TXT_ROOT, path), 'r', encoding='utf-8') as f:
+            url_lists = f.readlines()
+            URL_LIST = url_lists
+            return url_parser(url_lists)
+    else:
+        from utils.Protocol import croissant_to_dir_structure
+        return url_parser(croissant_to_dir_structure())
 
 
 def preprocess_dataset(dataset_dict: dataset_dict):
@@ -63,7 +76,7 @@ def load_scidb_dataset(dir_structure, string, streaming=False):
     target_dirs = string.split(',')
     print(f"Streaming: {streaming}")
     urls_all, file_extensions = filter_url_from_index(dir_structure, target_dirs)
-    print(urls_all  )
+    print(urls_all)
     print(file_extensions)
     kwargs={
         "path":LOCAL_SCRIPT_PATH,

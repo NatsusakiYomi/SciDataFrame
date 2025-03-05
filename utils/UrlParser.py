@@ -11,6 +11,8 @@ def url_parser(url_lists):
         # return ceda_url_parser(url_lists)
     elif "download.cncb.ac.cn" in sample:
         return gsa_url_parser(url_lists)
+    elif isinstance(sample,tuple):
+        return croissant_url_parser(url_lists)
     else:
         return scidb_url_parser(url_lists)
 def scidb_url_parser(url_lists):
@@ -83,6 +85,15 @@ def gsa_url_parser(url_lists):
         file_extensions.append(file_extension)
 
     return dir_structure
+
+def croissant_url_parser(url_lists):
+    dir_structure = {}
+    for (name,url) in url_lists:
+        file_extension = name.split(".")[-1].lower()
+        dir_structure[name] = (url, file_extension)
+    return dir_structure
+
+
 
 def filter_url_from_index(directory_structure, target_dir):
     all_urls = []

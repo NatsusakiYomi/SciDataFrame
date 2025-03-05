@@ -5,3 +5,4 @@ from .DataOperation import *
 from .TrainingTask import TrainingTask
 from .Check import *
 from .Parser import *
+from .Protocol import *
