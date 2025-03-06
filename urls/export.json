@@ -1,0 +1,960 @@
+{
+  "@context": {
+    "@language": "en",
+    "@vocab": "https://schema.org/",
+    "citeAs": "cr:citeAs",
+    "column": "cr:column",
+    "conformsTo": "dct:conformsTo",
+    "cr": "http://mlcommons.org/croissant/",
+    "data": {
+      "@id": "cr:data",
+      "@type": "@json"
+    },
+    "dataType": {
+      "@id": "cr:dataType",
+      "@type": "@vocab"
+    },
+    "dct": "http://purl.org/dc/terms/",
+    "examples": {
+      "@id": "cr:examples",
+      "@type": "@json"
+    },
+    "extract": "cr:extract",
+    "field": "cr:field",
+    "fileObject": "cr:fileObject",
+    "fileProperty": "cr:fileProperty",
+    "fileSet": "cr:fileSet",
+    "format": "cr:format",
+    "includes": "cr:includes",
+    "isLiveDataset": "cr:isLiveDataset",
+    "jsonPath": "cr:jsonPath",
+    "key": "cr:key",
+    "md5": "cr:md5",
+    "parentField": "cr:parentField",
+    "path": "cr:path",
+    "rai": "http://mlcommons.org/croissant/RAI/",
+    "recordSet": "cr:recordSet",
+    "references": "cr:references",
+    "regex": "cr:regex",
+    "repeated": "cr:repeated",
+    "replace": "cr:replace",
+    "sc": "https://schema.org/",
+    "separator": "cr:separator",
+    "source": "cr:source",
+    "subField": "cr:subField",
+    "transform": "cr:transform",
+    "wd": "https://www.wikidata.org/wiki/"
+  },
+  "@id": "https://doi.org/10.57760/sciencedb.01683",
+  "@type": "sc:Dataset",
+  "citeAs": "@data{ 73c1ddbd79e54638bd0ca2a6bd48e3ff,\n  title        = {{National and provincial population and economy projection databases under Shared Socioeconomic  Pathways(SSP1-5)_v2}},\n  author       = {{Tong Jiang and Buda Su and Cheng Jing and Yanjun Wang and Jinlong Huang and Huanhuan Guo and Yuming Yang and Guojie Wang and Yong Luo}},\n  year        = {{2024}},\n  month       = {{April}},\n  publisher   = {{Science Data Bank}},\n  doi         = {{10.57760/sciencedb.01683}},\n  url         = {{https://doi.org/10.57760/sciencedb.01683}},\n  version     = {{V4}}\n}",
+  "conditionsOfAccess": "PUBLIC",
+  "conformsTo": "http://mlcommons.org/croissant/1.0",
+  "creator": [
+    {
+      "@type": "sc:Person",
+      "affiliation": [
+        {
+          "@type": "sc:Organization",
+          "name": "国家气候中心"
+        }
+      ],
+      "name": "Tong Jiang"
+    },
+    {
+      "@type": "sc:Person",
+      "affiliation": [
+        {
+          "@id": "https://ror.org/02y0rxk19",
+          "@type": "sc:Organization",
+          "name": "南京信息工程大学"
+        }
+      ],
+      "name": "Buda Su"
+    },
+    {
+      "@type": "sc:Person",
+      "affiliation": [
+        {
+          "@id": "https://ror.org/01a8ev928",
+          "@type": "sc:Organization",
+          "name": "中国科学院新疆生态与地理研究所"
+        }
+      ],
+      "name": "Cheng Jing"
+    },
+    {
+      "@type": "sc:Person",
+      "affiliation": [
+        {
+          "@id": "https://ror.org/02y0rxk19",
+          "@type": "sc:Organization",
+          "name": "南京信息工程大学"
+        }
+      ],
+      "name": "Yanjun Wang"
+    },
+    {
+      "@type": "sc:Person",
+      "affiliation": [
+        {
+          "@id": "https://ror.org/02y0rxk19",
+          "@type": "sc:Organization",
+          "name": "南京信息工程大学"
+        }
+      ],
+      "name": "Jinlong Huang"
+    },
+    {
+      "@type": "sc:Person",
+      "affiliation": [
+        {
+          "@id": "https://ror.org/02y0rxk19",
+          "@type": "sc:Organization",
+          "name": "南京信息工程大学"
+        }
+      ],
+      "name": "Huanhuan Guo"
+    },
+    {
+      "@type": "sc:Person",
+      "affiliation": [
+        {
+          "@id": "https://ror.org/02y0rxk19",
+          "@type": "sc:Organization",
+          "name": "南京信息工程大学"
+        }
+      ],
+      "name": "Yuming Yang"
+    },
+    {
+      "@type": "sc:Person",
+      "affiliation": [
+        {
+          "@id": "https://ror.org/02y0rxk19",
+          "@type": "sc:Organization",
+          "name": "南京信息工程大学"
+        }
+      ],
+      "name": "Guojie Wang"
+    },
+    {
+      "@type": "sc:Person",
+      "affiliation": [
+        {
+          "@id": "https://ror.org/03cve4549",
+          "@type": "sc:Organization",
+          "name": "清华大学"
+        }
+      ],
+      "name": "Yong Luo"
+    }
+  ],
+  "datePublished": "2022-04-18T01:59:10Z",
+  "description": "V1 dataset:Under the global framework of Shared Socioeconomic Pathways (SSPs), based on localized population and economic parameters, a Population Development Environment (PDE) model is adopted to construct population grid data for SSPs from 2020 to 2100; Using the Cobb Douglas model, construct economic data for SSPs from 2020 to 2100.The v1 dataset includes:Population grid data of the world, The Belt and Road region, and China, with a spatial resolution of 0.5°GDP grid data of the world, The Belt and Road region, and China, with a spatial resolution of 0.5 °Grid data on the output value of three industries in the Chinese region, with a spatial resolution of 0.1 °V2 dataset:Based on the data from the 7th National Population Census of China, starting from 2020, the parameters such as fertility rate, mortality rate, migration rate, and education level in the Population Development Environment (PDE) model were updated. Under the Shared Socioeconomic Pathways (SSP1-5), a new version (v2) of the total population and age and gender specific population projection dataset for China and its provinces from 2020 to 2100 was created. Based on the data from the 7th National Population Census and the 4th Economic Census of China, with 2020 as the starting year, the parameters of total factor productivity, capital stock, labor input, and capital elasticity coefficient in the Cobb Douglas model were updated. Under the shared SSP1-5, a new version (v2) of China and its provincial GDP projectiondataset from 2020 to 2100 was created.The v2 (2024 version) dataset includes:Total Population Data of China and Provinces (2020-2100)Population data by age and gender in China (2020-2100)China and Provincial GDP Data (2020-2100)",
+  "distribution": [
+    {
+      "@id": "ac1e618b36338ae455106bef7a5b79cf",
+      "@type": "cr:FileObject",
+      "contentSize": "32521011 B",
+      "contentUrl": "https://china.scidb.cn/download?fileId=ac1e618b36338ae455106bef7a5b79cf",
+      "description": "",
+      "encodingFormat": "application/zip",
+      "md5": "e3aeff254a5ede382ac6066b9261db44",
+      "name": "tertiary_industry_SSP5.zip"
+    },
+    {
+      "@id": "0ef5a11b5cbc2cde851ac248ba08ee46",
+      "@type": "cr:FileObject",
+      "contentSize": "28212070 B",
+      "contentUrl": "https://china.scidb.cn/download?fileId=0ef5a11b5cbc2cde851ac248ba08ee46",
+      "description": "",
+      "encodingFormat": "application/zip",
+      "md5": "a32018f3d00f87c611ba91eda2484e37",
+      "name": "primary_industry_SSP2.zip"
+    },
+    {
+      "@id": "18f441610c3137fe7209168b7a6414b2",
+      "@type": "cr:FileObject",
+      "contentSize": "8071580 B",
+      "contentUrl": "https://china.scidb.cn/download?fileId=18f441610c3137fe7209168b7a6414b2",
+      "description": "",
+      "encodingFormat": "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+      "md5": "0cbce37c8791cdf9d39bebd9c78a086a",
+      "name": "pop_u_B\u0026R_ssp3_v1.xlsx"
+    },
+    {
+      "@id": "1bab0f0037df394fb317ea2428f80d66",
+      "@type": "cr:FileObject",
+      "contentSize": "35942480 B",
+      "contentUrl": "https://china.scidb.cn/download?fileId=1bab0f0037df394fb317ea2428f80d66",
+      "description": "",
+      "encodingFormat": "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+      "md5": "4df875e42071052de4028ba70f4a8d3a",
+      "name": "gdp_B\u0026R_ssp3_v1.xlsx"
+    },
+    {
+      "@id": "2a310d180ee32a615155abb134adc06d",
+      "@type": "cr:FileObject",
+      "contentSize": "83239615 B",
+      "contentUrl": "https://china.scidb.cn/download?fileId=2a310d180ee32a615155abb134adc06d",
+      "description": "",
+      "encodingFormat": "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+      "md5": "81854952c6055fa0c224c565d35313ba",
+      "name": "pop_world_ssp1_v1.xlsx"
+    },
+    {
+      "@id": "312ea7205818fab2b1ec3dbe538104d7",
+      "@type": "cr:FileObject",
+      "contentSize": "29349196 B",
+      "contentUrl": "https://china.scidb.cn/download?fileId=312ea7205818fab2b1ec3dbe538104d7",
+      "description": "",
+      "encodingFormat": "application/zip",
+      "md5": "bcebeb22698cfd029761835dde8a9b7c",
+      "name": "secondary_industry_SSP4.zip"
+    },
+    {
+      "@id": "17ba85d028b44b0d726fef39c94eee6a",
+      "@type": "cr:FileObject",
+      "contentSize": "11446880 B",
+      "contentUrl": "https://china.scidb.cn/download?fileId=17ba85d028b44b0d726fef39c94eee6a",
+      "description": "",
+      "encodingFormat": "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+      "md5": "5e79a56382cf8ec227a9df29d71c3a1d",
+      "name": "SSPs_POP_CHNT_v1.xlsx"
+    },
+    {
+      "@id": "011f2440cbc3699b2f6c5809890be48c",
+      "@type": "cr:FileObject",
+      "contentSize": "33048088 B",
+      "contentUrl": "https://china.scidb.cn/download?fileId=011f2440cbc3699b2f6c5809890be48c",
+      "description": "",
+      "encodingFormat": "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+      "md5": "bee6c1be6302c42441daddbea99d2f9b",
+      "name": "pop_B\u0026R_ssp2_v1.xlsx"
+    },
+    {
+      "@id": "c8cc77f18d6bea5c3a9cfb6dfd36b5f1",
+      "@type": "cr:FileObject",
+      "contentSize": "27314709 B",
+      "contentUrl": "https://china.scidb.cn/download?fileId=c8cc77f18d6bea5c3a9cfb6dfd36b5f1",
+      "description": "",
+      "encodingFormat": "application/zip",
+      "md5": "54e48c41ed93f4dff846216dfab34f4b",
+      "name": "primary_industry_SSP5.zip"
+    },
+    {
+      "@id": "04cbb2061970f238d6bd001bb9b81b89",
+      "@type": "cr:FileObject",
+      "contentSize": "31854938 B",
+      "contentUrl": "https://china.scidb.cn/download?fileId=04cbb2061970f238d6bd001bb9b81b89",
+      "description": "",
+      "encodingFormat": "application/zip",
+      "md5": "249a9908b9b9b4d65108c6dcc19ad9e2",
+      "name": "tertiary_industry_SSP4.zip"
+    },
+    {
+      "@id": "c67799414f860be53c44b9224480ece2",
+      "@type": "cr:FileObject",
+      "contentSize": "32153788 B",
+      "contentUrl": "https://china.scidb.cn/download?fileId=c67799414f860be53c44b9224480ece2",
+      "description": "",
+      "encodingFormat": "application/zip",
+      "md5": "976a812d4c2797d72fdfb77673cdc562",
+      "name": "tertiary_industry_SSP2.zip"
+    },
+    {
+      "@id": "051ed92798d28317ba440a136c17fe96",
+      "@type": "cr:FileObject",
+      "contentSize": "29507398 B",
+      "contentUrl": "https://china.scidb.cn/download?fileId=051ed92798d28317ba440a136c17fe96",
+      "description": "",
+      "encodingFormat": "application/zip",
+      "md5": "8043a2a4454dc67b4b4ac19a28886e92",
+      "name": "secondary_industry_SSP2.zip"
+    },
+    {
+      "@id": "f8cc7a08e2fc78759d8de7e7f9e40984",
+      "@type": "cr:FileObject",
+      "contentSize": "11376448 B",
+      "contentUrl": "https://china.scidb.cn/download?fileId=f8cc7a08e2fc78759d8de7e7f9e40984",
+      "description": "",
+      "encodingFormat": "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+      "md5": "7b3a2d91aa147b62ce6af2141adff27c",
+      "name": "SSPs_POP_U_CHNT_v1.xlsx"
+    },
+    {
+      "@id": "38839d6b346e596c49054213dcfaa0f6",
+      "@type": "cr:FileObject",
+      "contentSize": "84421510 B",
+      "contentUrl": "https://china.scidb.cn/download?fileId=38839d6b346e596c49054213dcfaa0f6",
+      "description": "",
+      "encodingFormat": "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+      "md5": "48e195488045d1222a2681440e691a3a",
+      "name": "pop_r_world_ssp3_v1.xlsx"
+    },
+    {
+      "@id": "a7723358bd4409f04e828f57ab77bac3",
+      "@type": "cr:FileObject",
+      "contentSize": "8071498 B",
+      "contentUrl": "https://china.scidb.cn/download?fileId=a7723358bd4409f04e828f57ab77bac3",
+      "description": "",
+      "encodingFormat": "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+      "md5": "f9fae4995b304ea007b5b1ba4e30445f",
+      "name": "pop_u_B\u0026R_ssp5_v1.xlsx"
+    },
+    {
+      "@id": "a11cda62e734532734866394565a52c1",
+      "@type": "cr:FileObject",
+      "contentSize": "85990662 B",
+      "contentUrl": "https://china.scidb.cn/download?fileId=a11cda62e734532734866394565a52c1",
+      "description": "",
+      "encodingFormat": "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+      "md5": "3b27bfc10395c7ad59056422c8f23844",
+      "name": "pop_r_world_ssp1_v1.xlsx"
+    },
+    {
+      "@id": "4825c9543cb0db1a9a46a4faeae97cd1",
+      "@type": "cr:FileObject",
+      "contentSize": "85936343 B",
+      "contentUrl": "https://china.scidb.cn/download?fileId=4825c9543cb0db1a9a46a4faeae97cd1",
+      "description": "",
+      "encodingFormat": "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+      "md5": "eff6d425c2a2475153a94fead19abd72",
+      "name": "pop_r_world_ssp4_v1.xlsx"
+    },
+    {
+      "@id": "1b56c037902b01a772172c40aba0a422",
+      "@type": "cr:FileObject",
+      "contentSize": "3567 B",
+      "contentUrl": "https://china.scidb.cn/download?fileId=1b56c037902b01a772172c40aba0a422",
+      "description": "",
+      "encodingFormat": "text/plain; charset=iso-8859-1",
+      "md5": "8eb89b26a4fa5406fbdd9608b8798351",
+      "name": "数据说明.txt"
+    },
+    {
+      "@id": "e8cabf93c980424508282793c395e17e",
+      "@type": "cr:FileObject",
+      "contentSize": "85727698 B",
+      "contentUrl": "https://china.scidb.cn/download?fileId=e8cabf93c980424508282793c395e17e",
+      "description": "",
+      "encodingFormat": "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+      "md5": "c45b47625954192d8f7a98eb44495b03",
+      "name": "pop_r_world_ssp5_v1.xlsx"
+    },
+    {
+      "@id": "306d4b6cf14e2030aa2d983b12915272",
+      "@type": "cr:FileObject",
+      "contentSize": "27237830 B",
+      "contentUrl": "https://china.scidb.cn/download?fileId=306d4b6cf14e2030aa2d983b12915272",
+      "description": "",
+      "encodingFormat": "application/zip",
+      "md5": "ca3e180db988a566383ee7800a7a02c7",
+      "name": "primary_industry_SSP3.zip"
+    },
+    {
+      "@id": "ddf02d0dcecfbba4adb494980bd52c09",
+      "@type": "cr:FileObject",
+      "contentSize": "35925348 B",
+      "contentUrl": "https://china.scidb.cn/download?fileId=ddf02d0dcecfbba4adb494980bd52c09",
+      "description": "",
+      "encodingFormat": "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+      "md5": "58c937adefcf84c5a32eb64106be7529",
+      "name": "gdp_B\u0026R_ssp4_v1.xlsx"
+    },
+    {
+      "@id": "a52ec9b53408a9c1f06125e2b4b5bc5f",
+      "@type": "cr:FileObject",
+      "contentSize": "11189679 B",
+      "contentUrl": "https://china.scidb.cn/download?fileId=a52ec9b53408a9c1f06125e2b4b5bc5f",
+      "description": "",
+      "encodingFormat": "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+      "md5": "63be4b61b47837f888eb98155f630f85",
+      "name": "SSPs_POP_R_CHNT_v1.xlsx"
+    },
+    {
+      "@id": "e52a18380a4337bf70305356d6edfbe2",
+      "@type": "cr:FileObject",
+      "contentSize": "19439940 B",
+      "contentUrl": "https://china.scidb.cn/download?fileId=e52a18380a4337bf70305356d6edfbe2",
+      "description": "",
+      "encodingFormat": "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+      "md5": "3c50810840aa3aa6b220fd018891f32c",
+      "name": "SSPs_GDP_CHNF_v1.xlsx"
+    },
+    {
+      "@id": "7a7a4cca838a6e99739a6abde44ae47d",
+      "@type": "cr:FileObject",
+      "contentSize": "46402 B",
+      "contentUrl": "https://china.scidb.cn/download?fileId=7a7a4cca838a6e99739a6abde44ae47d",
+      "description": "",
+      "encodingFormat": "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+      "md5": "c2adce0cb01596510680c8820f8c7bb5",
+      "name": "SSPs_POP_China_v2.xlsx"
+    },
+    {
+      "@id": "8a2058839151b65b91204f8c079ce4f4",
+      "@type": "cr:FileObject",
+      "contentSize": "83270546 B",
+      "contentUrl": "https://china.scidb.cn/download?fileId=8a2058839151b65b91204f8c079ce4f4",
+      "description": "",
+      "encodingFormat": "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+      "md5": "c5e961357d2581083afb8243208a672d",
+      "name": "pop_u_world_ssp3_v1.xlsx"
+    },
+    {
+      "@id": "50dfc90af121e6c92987cf81a0e7e4ac",
+      "@type": "cr:FileObject",
+      "contentSize": "85137005 B",
+      "contentUrl": "https://china.scidb.cn/download?fileId=50dfc90af121e6c92987cf81a0e7e4ac",
+      "description": "",
+      "encodingFormat": "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+      "md5": "9f34fb039cb9bfd9bfb225fa2a56a469",
+      "name": "pop_r_world_ssp2_v1.xlsx"
+    },
+    {
+      "@id": "7303e91c406c8eadf1f233fb6e333816",
+      "@type": "cr:FileObject",
+      "contentSize": "32385760 B",
+      "contentUrl": "https://china.scidb.cn/download?fileId=7303e91c406c8eadf1f233fb6e333816",
+      "description": "",
+      "encodingFormat": "application/zip",
+      "md5": "a4ba220738e6a73094c11a7e316b6ffa",
+      "name": "tertiary_industry_SSP1.zip"
+    },
+    {
+      "@id": "ac6a011586c9375140124c62c8aede8d",
+      "@type": "cr:FileObject",
+      "contentSize": "86371834 B",
+      "contentUrl": "https://china.scidb.cn/download?fileId=ac6a011586c9375140124c62c8aede8d",
+      "description": "",
+      "encodingFormat": "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+      "md5": "dc06c70139f5b68f1bba7e8627ad507d",
+      "name": "gdp_world_ssp3_v1.xlsx"
+    },
+    {
+      "@id": "c501849c3b6c8949cacd39d8e6e76759",
+      "@type": "cr:FileObject",
+      "contentSize": "61219 B",
+      "contentUrl": "https://china.scidb.cn/download?fileId=c501849c3b6c8949cacd39d8e6e76759",
+      "description": "",
+      "encodingFormat": "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+      "md5": "29b56c497a34a267d5cff69a5fcf85a9",
+      "name": "SSPs_POP_Prov_v2.xlsx"
+    },
+    {
+      "@id": "e463d5e0c96b5cb4c6fc56a680936195",
+      "@type": "cr:FileObject",
+      "contentSize": "8071444 B",
+      "contentUrl": "https://china.scidb.cn/download?fileId=e463d5e0c96b5cb4c6fc56a680936195",
+      "description": "",
+      "encodingFormat": "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+      "md5": "9c8e2f7d63e19047a669f88e0ce2fda9",
+      "name": "pop_r_B\u0026R_ssp2_v1.xlsx"
+    },
+    {
+      "@id": "88b4246ddf695dd3d0951d0c851cb1f7",
+      "@type": "cr:FileObject",
+      "contentSize": "30561571 B",
+      "contentUrl": "https://china.scidb.cn/download?fileId=88b4246ddf695dd3d0951d0c851cb1f7",
+      "description": "",
+      "encodingFormat": "application/zip",
+      "md5": "b2daf1aa25cdb91a74b8871f076600b0",
+      "name": "secondary_industry_SSP5.zip"
+    },
+    {
+      "@id": "9e9a6f27954dc5d3f4d33d9d62081365",
+      "@type": "cr:FileObject",
+      "contentSize": "8071734 B",
+      "contentUrl": "https://china.scidb.cn/download?fileId=9e9a6f27954dc5d3f4d33d9d62081365",
+      "description": "",
+      "encodingFormat": "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+      "md5": "d3090941cef3249994d428109230f179",
+      "name": "pop_r_B\u0026R_ssp4_v1.xlsx"
+    },
+    {
+      "@id": "419164d412115f6a2e8c187ce83bf24b",
+      "@type": "cr:FileObject",
+      "contentSize": "86972888 B",
+      "contentUrl": "https://china.scidb.cn/download?fileId=419164d412115f6a2e8c187ce83bf24b",
+      "description": "",
+      "encodingFormat": "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+      "md5": "28dc96b36e24355788217d61c0087aed",
+      "name": "gdp_world_ssp1_v1.xlsx"
+    },
+    {
+      "@id": "59c60841e3ae0b59b5e8079cf87e7787",
+      "@type": "cr:FileObject",
+      "contentSize": "28719944 B",
+      "contentUrl": "https://china.scidb.cn/download?fileId=59c60841e3ae0b59b5e8079cf87e7787",
+      "description": "",
+      "encodingFormat": "application/zip",
+      "md5": "4635978ac8100c20ee8eca0a0771268d",
+      "name": "primary_industry_SSP1.zip"
+    },
+    {
+      "@id": "5306bdfcab4ed1324d85fe5ef4d0cf5b",
+      "@type": "cr:FileObject",
+      "contentSize": "87706729 B",
+      "contentUrl": "https://china.scidb.cn/download?fileId=5306bdfcab4ed1324d85fe5ef4d0cf5b",
+      "description": "",
+      "encodingFormat": "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+      "md5": "b4ad75439b84e8f42ab4dcc3f56e062e",
+      "name": "gdp_world_ssp5_v1.xlsx"
+    },
+    {
+      "@id": "58a40df1838823d360599b044eabf31b",
+      "@type": "cr:FileObject",
+      "contentSize": "83608694 B",
+      "contentUrl": "https://china.scidb.cn/download?fileId=58a40df1838823d360599b044eabf31b",
+      "description": "",
+      "encodingFormat": "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+      "md5": "61fa21f50fc894ba991cd8472bd3f6a1",
+      "name": "pop_u_world_ssp4_v1.xlsx"
+    },
+    {
+      "@id": "ab2c0015779648ee4cc0d75c2a8302e6",
+      "@type": "cr:FileObject",
+      "contentSize": "33635144 B",
+      "contentUrl": "https://china.scidb.cn/download?fileId=ab2c0015779648ee4cc0d75c2a8302e6",
+      "description": "",
+      "encodingFormat": "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+      "md5": "838a81c8592088d35cb8839be6a0c5ac",
+      "name": "pop_B\u0026R_ssp4_v1.xlsx"
+    },
+    {
+      "@id": "a6a8b8f3ef27f9b19055e0ddcdac05ba",
+      "@type": "cr:FileObject",
+      "contentSize": "8071830 B",
+      "contentUrl": "https://china.scidb.cn/download?fileId=a6a8b8f3ef27f9b19055e0ddcdac05ba",
+      "description": "",
+      "encodingFormat": "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+      "md5": "d018a77e4aa47c90143fb4bcf520d807",
+      "name": "pop_r_B\u0026R_ssp1_v1.xlsx"
+    },
+    {
+      "@id": "d2ac98592c8e58ffb8409f8d7007355e",
+      "@type": "cr:FileObject",
+      "contentSize": "27666486 B",
+      "contentUrl": "https://china.scidb.cn/download?fileId=d2ac98592c8e58ffb8409f8d7007355e",
+      "description": "",
+      "encodingFormat": "application/zip",
+      "md5": "1e94182b81e42a71881d0b441cf5f025",
+      "name": "primary_industry_SSP4.zip"
+    },
+    {
+      "@id": "e82d251ef6232ef2433d0f753cb179d0",
+      "@type": "cr:FileObject",
+      "contentSize": "83380696 B",
+      "contentUrl": "https://china.scidb.cn/download?fileId=e82d251ef6232ef2433d0f753cb179d0",
+      "description": "",
+      "encodingFormat": "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+      "md5": "20ddd4bc1120a02226a869cb5862f509",
+      "name": "pop_world_ssp4_v1.xlsx"
+    },
+    {
+      "@id": "c139b7c244276d889aac9fd508e17de7",
+      "@type": "cr:FileObject",
+      "contentSize": "83016377 B",
+      "contentUrl": "https://china.scidb.cn/download?fileId=c139b7c244276d889aac9fd508e17de7",
+      "description": "",
+      "encodingFormat": "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+      "md5": "e5ab92548293fa06dd2fc112f70ac221",
+      "name": "pop_world_ssp3_v1.xlsx"
+    },
+    {
+      "@id": "7b4736aa40adb044e136da69beeadb5a",
+      "@type": "cr:FileObject",
+      "contentSize": "11180215 B",
+      "contentUrl": "https://china.scidb.cn/download?fileId=7b4736aa40adb044e136da69beeadb5a",
+      "description": "",
+      "encodingFormat": "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+      "md5": "d7af92c477a16886d07afcae851ecd56",
+      "name": "SSPs_POP_R_CHNF_v1.xlsx"
+    },
+    {
+      "@id": "47deb3d3394239a16bbcf01256201146",
+      "@type": "cr:FileObject",
+      "contentSize": "36311305 B",
+      "contentUrl": "https://china.scidb.cn/download?fileId=47deb3d3394239a16bbcf01256201146",
+      "description": "",
+      "encodingFormat": "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+      "md5": "b870f7c9443a2247e92488b3f692ff17",
+      "name": "gdp_B\u0026R_ssp5_v1.xlsx"
+    },
+    {
+      "@id": "497b0bc08edcba1cf0e4d683b51587aa",
+      "@type": "cr:FileObject",
+      "contentSize": "87309695 B",
+      "contentUrl": "https://china.scidb.cn/download?fileId=497b0bc08edcba1cf0e4d683b51587aa",
+      "description": "",
+      "encodingFormat": "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+      "md5": "0963a15ad1d8a14f79b941dcb8bb107a",
+      "name": "gdp_world_ssp2_v1.xlsx"
+    },
+    {
+      "@id": "ad2481f90f8df7aaceced1e2481cd4a4",
+      "@type": "cr:FileObject",
+      "contentSize": "22558387 B",
+      "contentUrl": "https://china.scidb.cn/download?fileId=ad2481f90f8df7aaceced1e2481cd4a4",
+      "description": "",
+      "encodingFormat": "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+      "md5": "702cd8077c95333e0920a031f8dbbe6f",
+      "name": "SSPs_GDP_CHNT_v1.xlsx"
+    },
+    {
+      "@id": "1f5edabd1347be4e24a759cd908f520e",
+      "@type": "cr:FileObject",
+      "contentSize": "33268387 B",
+      "contentUrl": "https://china.scidb.cn/download?fileId=1f5edabd1347be4e24a759cd908f520e",
+      "description": "",
+      "encodingFormat": "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+      "md5": "59d6c955d6f78d8fe8da30c62021c39b",
+      "name": "pop_B\u0026R_ssp5_v1.xlsx"
+    },
+    {
+      "@id": "de90eb306d574f991dae52afdb0c8f35",
+      "@type": "cr:FileObject",
+      "contentSize": "83647689 B",
+      "contentUrl": "https://china.scidb.cn/download?fileId=de90eb306d574f991dae52afdb0c8f35",
+      "description": "",
+      "encodingFormat": "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+      "md5": "0dda0a194669b32d8a192f874801f166",
+      "name": "pop_u_world_ssp1_v1.xlsx"
+    },
+    {
+      "@id": "21296ce0d64adfc057037b53013c5c4e",
+      "@type": "cr:FileObject",
+      "contentSize": "29860957 B",
+      "contentUrl": "https://china.scidb.cn/download?fileId=21296ce0d64adfc057037b53013c5c4e",
+      "description": "",
+      "encodingFormat": "application/zip",
+      "md5": "d9753941ed6fd0a35cf48586e7bb2041",
+      "name": "secondary_industry_SSP1.zip"
+    },
+    {
+      "@id": "1eb5adf74e46c8a2e03beedd511d528a",
+      "@type": "cr:FileObject",
+      "contentSize": "31274796 B",
+      "contentUrl": "https://china.scidb.cn/download?fileId=1eb5adf74e46c8a2e03beedd511d528a",
+      "description": "",
+      "encodingFormat": "application/zip",
+      "md5": "6d991fcc2f4c7579a892774a0b660de6",
+      "name": "tertiary_industry_SSP3.zip"
+    },
+    {
+      "@id": "7b1638a1411f071345e9b556ed881c53",
+      "@type": "cr:FileObject",
+      "contentSize": "36190600 B",
+      "contentUrl": "https://china.scidb.cn/download?fileId=7b1638a1411f071345e9b556ed881c53",
+      "description": "",
+      "encodingFormat": "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+      "md5": "5d9b5743df2eb8bcd1aefb6fdf317d57",
+      "name": "gdp_B\u0026R_ssp2_v1.xlsx"
+    },
+    {
+      "@id": "c7fb5ea6ef4e511f20cd309fc5ec1310",
+      "@type": "cr:FileObject",
+      "contentSize": "3567 B",
+      "contentUrl": "https://china.scidb.cn/download?fileId=c7fb5ea6ef4e511f20cd309fc5ec1310",
+      "description": "",
+      "encodingFormat": "text/plain; charset=iso-8859-1",
+      "md5": "96356ef9788a3c5d960b1a68372661dc",
+      "name": "数据说明.txt"
+    },
+    {
+      "@id": "c5fa1bbcfbddc05ff95e044c6428ef93",
+      "@type": "cr:FileObject",
+      "contentSize": "82840273 B",
+      "contentUrl": "https://china.scidb.cn/download?fileId=c5fa1bbcfbddc05ff95e044c6428ef93",
+      "description": "",
+      "encodingFormat": "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+      "md5": "1730dcd7fc0de38abb0d31bcae565da5",
+      "name": "pop_world_ssp2_v1.xlsx"
+    },
+    {
+      "@id": "412d84b73500b02ef5c99139ea9db106",
+      "@type": "cr:FileObject",
+      "contentSize": "86901254 B",
+      "contentUrl": "https://china.scidb.cn/download?fileId=412d84b73500b02ef5c99139ea9db106",
+      "description": "",
+      "encodingFormat": "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+      "md5": "c66c00326d6be7676e31ac6ee7e23750",
+      "name": "gdp_world_ssp4_v1.xlsx"
+    },
+    {
+      "@id": "84bb1e62da4b25ef9d2da3ad4789e122",
+      "@type": "cr:FileObject",
+      "contentSize": "11352348 B",
+      "contentUrl": "https://china.scidb.cn/download?fileId=84bb1e62da4b25ef9d2da3ad4789e122",
+      "description": "",
+      "encodingFormat": "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+      "md5": "17590d7ca963ff7d5c96da5274e9064f",
+      "name": "SSPs_POP_U_CHNF_v1.xlsx"
+    },
+    {
+      "@id": "b9041597f893f88bc7e713fc24095dbe",
+      "@type": "cr:FileObject",
+      "contentSize": "35873351 B",
+      "contentUrl": "https://china.scidb.cn/download?fileId=b9041597f893f88bc7e713fc24095dbe",
+      "description": "",
+      "encodingFormat": "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+      "md5": "fe48ff3958aed401c06a43032ecb567b",
+      "name": "gdp_B\u0026R_ssp1_v1.xlsx"
+    },
+    {
+      "@id": "7acc203794e4772bdde435324d7aa849",
+      "@type": "cr:FileObject",
+      "contentSize": "8071519 B",
+      "contentUrl": "https://china.scidb.cn/download?fileId=7acc203794e4772bdde435324d7aa849",
+      "description": "",
+      "encodingFormat": "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+      "md5": "10b006ea0ede5ad592c16a742f04dbba",
+      "name": "pop_u_B\u0026R_ssp2_v1.xlsx"
+    },
+    {
+      "@id": "f964107304da4e293728e80676a2b879",
+      "@type": "cr:FileObject",
+      "contentSize": "11407161 B",
+      "contentUrl": "https://china.scidb.cn/download?fileId=f964107304da4e293728e80676a2b879",
+      "description": "",
+      "encodingFormat": "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+      "md5": "e843f5c4ff2691c6b8840cde4bbd70de",
+      "name": "SSPs_POP_CHNF_v1.xlsx"
+    },
+    {
+      "@id": "6689f8d54b0afcbbdea672f35ceffaa8",
+      "@type": "cr:FileObject",
+      "contentSize": "8071735 B",
+      "contentUrl": "https://china.scidb.cn/download?fileId=6689f8d54b0afcbbdea672f35ceffaa8",
+      "description": "",
+      "encodingFormat": "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+      "md5": "397d515783a43da21832cee335447abc",
+      "name": "pop_u_B\u0026R_ssp4_v1.xlsx"
+    },
+    {
+      "@id": "ca083b07a6269332b004a67226457606",
+      "@type": "cr:FileObject",
+      "contentSize": "33114030 B",
+      "contentUrl": "https://china.scidb.cn/download?fileId=ca083b07a6269332b004a67226457606",
+      "description": "",
+      "encodingFormat": "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+      "md5": "edfbbb0f2d7c5c94abdf85d386f480fa",
+      "name": "pop_B\u0026R_ssp3_v1.xlsx"
+    },
+    {
+      "@id": "ce7e75d5c70700ef10c1c8a30cc9b343",
+      "@type": "cr:FileObject",
+      "contentSize": "210200 B",
+      "contentUrl": "https://china.scidb.cn/download?fileId=ce7e75d5c70700ef10c1c8a30cc9b343",
+      "description": "",
+      "encodingFormat": "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+      "md5": "716be6d4fcfb56b3aa293cf22508dde2",
+      "name": "GDP_Prov_v1.xlsx"
+    },
+    {
+      "@id": "c24a5619d208251a181d9f5e70b07ba5",
+      "@type": "cr:FileObject",
+      "contentSize": "8071664 B",
+      "contentUrl": "https://china.scidb.cn/download?fileId=c24a5619d208251a181d9f5e70b07ba5",
+      "description": "",
+      "encodingFormat": "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+      "md5": "4826a3bcc716fc6963a0fdc8fbcca298",
+      "name": "pop_r_B\u0026R_ssp3_v1.xlsx"
+    },
+    {
+      "@id": "19259b41ee5c70eaea3e8dcb2144b98c",
+      "@type": "cr:FileObject",
+      "contentSize": "29439904 B",
+      "contentUrl": "https://china.scidb.cn/download?fileId=19259b41ee5c70eaea3e8dcb2144b98c",
+      "description": "",
+      "encodingFormat": "application/zip",
+      "md5": "79031527afa86149c5c507ee183765c5",
+      "name": "secondary_industry_SSP3.zip"
+    },
+    {
+      "@id": "f3b9b2691d0b766ca58fb2415e3a943c",
+      "@type": "cr:FileObject",
+      "contentSize": "2349 B",
+      "contentUrl": "https://china.scidb.cn/download?fileId=f3b9b2691d0b766ca58fb2415e3a943c",
+      "description": "",
+      "encodingFormat": "text/plain; charset=iso-8859-1",
+      "md5": "0a038dbe2526d965570f4676a7701b7d",
+      "name": "数据说明.txt"
+    },
+    {
+      "@id": "b41fd6c26ec0d26cc31e718c1d0bc78f",
+      "@type": "cr:FileObject",
+      "contentSize": "3567 B",
+      "contentUrl": "https://china.scidb.cn/download?fileId=b41fd6c26ec0d26cc31e718c1d0bc78f",
+      "description": "",
+      "encodingFormat": "text/plain; charset=iso-8859-1",
+      "md5": "96356ef9788a3c5d960b1a68372661dc",
+      "name": "数据说明.txt"
+    },
+    {
+      "@id": "23715e6620516a88c915d41df4ef4928",
+      "@type": "cr:FileObject",
+      "contentSize": "3567 B",
+      "contentUrl": "https://china.scidb.cn/download?fileId=23715e6620516a88c915d41df4ef4928",
+      "description": "",
+      "encodingFormat": "text/plain; charset=iso-8859-1",
+      "md5": "96356ef9788a3c5d960b1a68372661dc",
+      "name": "数据说明.txt"
+    },
+    {
+      "@id": "f3ba518341c8b802c890c1bf14fa1fe4",
+      "@type": "cr:FileObject",
+      "contentSize": "84062018 B",
+      "contentUrl": "https://china.scidb.cn/download?fileId=f3ba518341c8b802c890c1bf14fa1fe4",
+      "description": "",
+      "encodingFormat": "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+      "md5": "225d22571d59cff5a5acc076f4357573",
+      "name": "pop_u_world_ssp5_v1.xlsx"
+    },
+    {
+      "@id": "101f87cb6d2993e729501a4d4cfa2ba6",
+      "@type": "cr:FileObject",
+      "contentSize": "3567 B",
+      "contentUrl": "https://china.scidb.cn/download?fileId=101f87cb6d2993e729501a4d4cfa2ba6",
+      "description": "",
+      "encodingFormat": "text/plain; charset=iso-8859-1",
+      "md5": "96356ef9788a3c5d960b1a68372661dc",
+      "name": "数据说明.txt"
+    },
+    {
+      "@id": "3eb562eb65892908c36dd8d9eca42551",
+      "@type": "cr:FileObject",
+      "contentSize": "8071643 B",
+      "contentUrl": "https://china.scidb.cn/download?fileId=3eb562eb65892908c36dd8d9eca42551",
+      "description": "",
+      "encodingFormat": "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+      "md5": "6c7ea4037bdc15a3464e0c41f0f344c9",
+      "name": "pop_r_B\u0026R_ssp5_v1.xlsx"
+    },
+    {
+      "@id": "7d62abf6c2ccb214e6c5eae7c9c8c634",
+      "@type": "cr:FileObject",
+      "contentSize": "33465652 B",
+      "contentUrl": "https://china.scidb.cn/download?fileId=7d62abf6c2ccb214e6c5eae7c9c8c634",
+      "description": "",
+      "encodingFormat": "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+      "md5": "1e7858909e4bde1776dcc24de7e14a29",
+      "name": "pop_B\u0026R_ssp1_v1.xlsx"
+    },
+    {
+      "@id": "6a17a3b9e62fc588a9a54b34a3a509db",
+      "@type": "cr:FileObject",
+      "contentSize": "8071662 B",
+      "contentUrl": "https://china.scidb.cn/download?fileId=6a17a3b9e62fc588a9a54b34a3a509db",
+      "description": "",
+      "encodingFormat": "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+      "md5": "03c4555b5a55d7838ff1414ddff941ff",
+      "name": "pop_u_B\u0026R_ssp1_v1.xlsx"
+    },
+    {
+      "@id": "6d84ef99bf4e1835f7927b37183697ef",
+      "@type": "cr:FileObject",
+      "contentSize": "83491323 B",
+      "contentUrl": "https://china.scidb.cn/download?fileId=6d84ef99bf4e1835f7927b37183697ef",
+      "description": "",
+      "encodingFormat": "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+      "md5": "de9f1394df1f1183d1d97553651e08b6",
+      "name": "pop_world_ssp5_v1.xlsx"
+    },
+    {
+      "@id": "91dfffaf21920ef80cd64748d4902c34",
+      "@type": "cr:FileObject",
+      "contentSize": "83410086 B",
+      "contentUrl": "https://china.scidb.cn/download?fileId=91dfffaf21920ef80cd64748d4902c34",
+      "description": "",
+      "encodingFormat": "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+      "md5": "51acc0fbced510072ec367164e47bc52",
+      "name": "pop_u_world_ssp2_v1.xlsx"
+    },
+    {
+      "@id": "b6b6b51d9c0f593b368d06def3df6d1f",
+      "@type": "cr:FileObject",
+      "contentSize": "130357 B",
+      "contentUrl": "https://china.scidb.cn/download?fileId=b6b6b51d9c0f593b368d06def3df6d1f",
+      "description": "",
+      "encodingFormat": "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+      "md5": "0ecb74eeee971d3735c14e5d22b48153",
+      "name": "POP_Prov_v1.xlsx"
+    },
+    {
+      "@id": "f82eb815d5eb731aaa9f03aabbe63ae9",
+      "@type": "cr:FileObject",
+      "contentSize": "195210 B",
+      "contentUrl": "https://china.scidb.cn/download?fileId=f82eb815d5eb731aaa9f03aabbe63ae9",
+      "description": "",
+      "encodingFormat": "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+      "md5": "9a6412019400159f371dc29b554305cc",
+      "name": "SSPs_GDP_Prov_v2.xlsx"
+    },
+    {
+      "@id": "84bb5438e7aaf8121d7238f02493e811",
+      "@type": "cr:FileObject",
+      "contentSize": "15099 B",
+      "contentUrl": "https://china.scidb.cn/download?fileId=84bb5438e7aaf8121d7238f02493e811",
+      "description": "",
+      "encodingFormat": "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+      "md5": "b8cec360ba38c5957cc8f623001a744c",
+      "name": "SSPs_GDP_China_v2.xlsx"
+    },
+    {
+      "@id": "87366d657ec2b23d4515c92e1c8793d6",
+      "@type": "cr:FileObject",
+      "contentSize": "3138 B",
+      "contentUrl": "https://china.scidb.cn/download?fileId=87366d657ec2b23d4515c92e1c8793d6",
+      "description": "",
+      "encodingFormat": "text/plain; charset=iso-8859-1",
+      "md5": "62dee166c28f1ab7ac090aa5aa0926f1",
+      "name": "数据说明.txt"
+    },
+    {
+      "@id": "63c67ec64a02bdce803c214de321c1b9",
+      "@type": "cr:FileObject",
+      "contentSize": "4942 B",
+      "contentUrl": "https://china.scidb.cn/download?fileId=63c67ec64a02bdce803c214de321c1b9",
+      "description": "",
+      "encodingFormat": "text/plain; charset=iso-8859-1",
+      "md5": "14969395952fd9183d4c6687f2adacb1",
+      "name": "数据说明 .txt"
+    }
+  ],
+  "identifier": "https://doi.org/10.57760/sciencedb.01683",
+  "inLanguage": "en_US",
+  "includedInDataCatalog": {
+    "@id": "https://www.scidb.cn",
+    "@type": "sc:DataCatalog",
+    "@url": "http://www.scidb.cn",
+    "name": "Science Data Bank"
+  },
+  "keywords": [
+    "China",
+    "Province",
+    "Total population",
+    "Age structure",
+    "Gender structure",
+    "Shared Socioeconomic Pathways",
+    "Projected data",
+    "2020-2100",
+    "Economy"
+  ],
+  "license": "https://creativecommons.org/licenses/by/4.0/",
+  "name": "National and provincial population and economy projection databases under Shared Socioeconomic  Pathways(SSP1-5)_v2",
+  "publisher": {
+    "@type": "sc:Organization",
+    "@url": "http://www.scidb.cn",
+    "name": "Science Data Bank"
+  },
+  "size": {
+    "@type": "sc:QuantitativeValue",
+    "unitText": "bytes",
+    "value": 2682631796
+  },
+  "url": "https://doi.org/10.57760/sciencedb.01683",
+  "version": "4.0.0"
+}

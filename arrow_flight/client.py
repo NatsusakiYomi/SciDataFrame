@@ -48,7 +48,7 @@ class Client():
         # 获取 schema
         self.dataset_id = dataset_id
         action = fl.Action("get_schema", self.dataset_id.encode("utf-8"))
-        self.fl_client.do_action(action)
+        # self.fl_client.do_action(action)
         schema_results = self.fl_client.do_action(action,pyarrow.flight.FlightCallOptions(timeout=60))
         schema = None
         # 处理返回的 schema
@@ -117,6 +117,10 @@ class Client():
             reader = reader.read_all()
         print(reader)
         return reader
+
+    def generate_croissant_json(self):
+        action = fl.Action("generate_croissant_json", "True".encode("utf-8"))
+        self.fl_client.do_action(action)
 
     def close(self):
         self.fl_client.close()

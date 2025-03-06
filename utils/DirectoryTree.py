@@ -30,8 +30,14 @@ class DirectoryTree:
                 file_count += 1
                 if file_count == 4:
                     print(' ' * indent + '...')
+                    self.schema_dict['name'].append(key)
+                    self.schema_dict['type'].append('file' if file_flag else 'dir')
+                    self.schema_dict['depth'].append(indent // 4)
                     continue
                 elif file_count > 4:
+                    self.schema_dict['name'].append(key)
+                    self.schema_dict['type'].append('file' if file_flag else 'dir')
+                    self.schema_dict['depth'].append(indent // 4)
                     continue
             print(' ' * indent + str(key))
             self.schema_dict['name'].append(key)

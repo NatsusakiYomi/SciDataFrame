@@ -136,6 +136,8 @@ class MyFlightServer(fl.FlightServerBase):
             pass
         elif action.type == "parse_open":
             self.parse_open()
+        elif action.type == "generate_croissant_json":
+            self.generate_croissant_json()
         else:
             raise NotImplementedError
 
@@ -380,6 +382,11 @@ class MyFlightServer(fl.FlightServerBase):
         print(data_normalized)
         self.dataset = data_normalized
 
+    def generate_croissant_json(self):
+        from utils.Protocol import scidataframe_to_croissant
+        print("Generating croissant json...")
+        # print(self.dataset_id,self.schema,self.dir_structure)
+        scidataframe_to_croissant(self.dataset_id,self.schema.to_pandas(),self.dir_structure)
 
 if __name__ == "__main__":
     server = MyFlightServer('grpc://127.0.0.1:8815')

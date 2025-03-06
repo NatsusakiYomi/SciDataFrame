@@ -124,13 +124,16 @@ class SciDataFrame:
         self.schema = self.client.get_schema(self.dataset_id).to_pandas()
         return self.schema
 
+    def generate_croissant_json(self):
+        self.client.generate_croissant_json()
+
     def flat_open(self, paths=None):
         try:
 
             print("file level:", self.level)
             self.client.load_init(**self.load_kwargs)
             self.is_iterate = self.load_kwargs.get('is_iterate', None)
-            paths,level = self._get_all_paths() if paths is None else paths,self.is_paths_list_a_file(paths.split(","))
+            paths,level = self._get_all_paths() if paths is None else (paths,self.is_paths_list_a_file(paths.split(",")))
             action = fl.Action("put_folder_path", paths.encode("utf-8"))
             self.level=Level.FILE
             self.client.fl_client.do_action(action)
@@ -160,3 +163,29 @@ class SciDataFrame:
                 self.counter += 1
         else:
             raise NotImplementedError('Batch size not implemented yet')
+
+if __name__ == "__main__":
+    from utils import TrainingTask, Level
+    dataset_id = 'croissant.json'
+    dataset_path = None
+    is_analyze = False
+    is_preprocess = False
+    is_get_dataset_str = False
+    is_streaming = False
+    task = TrainingTask.Recommendation
+    batch_size = 1
+    is_iterate = False
+    kwargs = {
+        # "dataset_id": dataset_id,
+        # "folder_path": dataset_path,
+        "is_analyze": is_analyze,
+        "is_preprocess": is_preprocess,
+        "is_get_dataset_str": is_get_dataset_str,
+        "is_streaming": is_streaming,
+        "task": task,
+        "batch_size": batch_size,
+        "is_iterate": is_iterate,
+    }
+    df = SciDataFrame(dataset_id, **kwargs)
+    df.get_schema()
+    df.flat_open()

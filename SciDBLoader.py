@@ -48,7 +48,7 @@ def read_url_from_txt(path):
             return url_parser(url_lists)
     else:
         from utils.Protocol import croissant_to_dir_structure
-        return url_parser(croissant_to_dir_structure())
+        return url_parser(croissant_to_dir_structure(path))
 
 
 def preprocess_dataset(dataset_dict: dataset_dict):

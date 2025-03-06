@@ -13,3 +13,4 @@ torch==2.0.0 -f https://download.pytorch.org/whl/cu127
 torchvision==0.15.0 -f https://download.pytorch.org/whl/cu127
 torchaudio==2.0.0 -f https://download.pytorch.org/whl/cu127
 accelerate>=0.26.0
+validators
