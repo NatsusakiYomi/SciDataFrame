@@ -121,7 +121,8 @@ class SciDataFrame:
 
 
     def get_schema(self):
-        self.schema = self.client.get_schema(self.dataset_id).to_pandas()
+        if self.schema is None:
+            self.schema = self.client.get_schema(self.dataset_id).to_pandas()
         return self.schema
 
     def generate_croissant_json(self):

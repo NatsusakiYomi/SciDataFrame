@@ -16,8 +16,8 @@
 
 import os
 import sys
-sys.path.extend(["C:\\Users\\NatsusakiYomi\\Documents\\Study\\Postgrad1\\research\\Sci2DB\\test\\SciDB2Dataset"])
-print(sys.path)
+# sys.path.extend(["C:\\Users\\NatsusakiYomi\\Documents\\Study\\Postgrad1\\research\\Sci2DB\\test\\SciDB2Dataset"])
+# print(sys.path)
 import shutil
 
 import random

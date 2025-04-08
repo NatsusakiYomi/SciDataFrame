@@ -3,13 +3,13 @@ from utils import TrainingTask
 
 dataset_id = 'new.txt'
 dataset_path = None
-is_analyze = True
-is_preprocess = True
-is_get_dataset_str = False
-is_streaming = True
-is_iterate = False
+is_analyze = False
+is_preprocess = False
+is_get_dataset_str = True
+is_streaming = False
 task = TrainingTask.Recommendation
 batch_size = 1
+is_iterate = False
 kwargs = {
     # "dataset_id": dataset_id,
     # "folder_path": dataset_path,
@@ -25,10 +25,6 @@ kwargs = {
 df = SciDataFrame(dataset_id, **kwargs)
 # 获得数据集schema
 schema = df.get_schema()
+df.flat_open("dataset.csv")
 # 打开文件（夹）
 # df = df.open("out")
-# df = df.open(dataset_path)
-# 加载数据
-df.flat_open()
-for i in df:
-    pass

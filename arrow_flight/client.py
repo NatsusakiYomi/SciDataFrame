@@ -96,7 +96,7 @@ class Client():
             if self.is_get_dataset_str:
                 action = fl.Action("get_dataset_str", "True".encode("utf-8"))
                 results = self.fl_client.do_action(action)
-            if not self.is_preprocess:
+            if not self.is_preprocess and not self.is_get_dataset_str:
                 action = fl.Action("parse_open", "True".encode("utf-8"))
                 results = self.fl_client.do_action(action)
 

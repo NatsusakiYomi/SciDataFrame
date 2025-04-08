@@ -134,18 +134,19 @@ if __name__ == '__main__':
     # PATH = '91574142078b45c79d532d97b294ed44.txt'
     #
     # PATH = 'c0bd7f5c79a24e48849432629f59639f.txt'
-    PATH = '533223505102110720.txt'
+    PATH = 'parser_test.txt'
     # PATH = "new.txt"
-    PATH = "2gb.txt"
-    PATH = "8621e1b39c9a4acd87fee2be516d22ce.txt"
-    load_sciencedb(PATH, streaming=False)
-    read_url_from_txt("7e0a4faa0d0649918ae3e94ef34b94af.txt")
-    read_url_from_txt("GSA_url.txt")
+    # PATH = "2gb.txt"
+    # PATH = "8621e1b39c9a4acd87fee2be516d22ce.txt"
+
+    print(load_sciencedb(PATH, streaming=False))
+    # read_url_from_txt("7e0a4faa0d0649918ae3e94ef34b94af.txt")
+    # read_url_from_txt("GSA_url.txt")
     #
     # PATH = 'b6a1d3f42b014fa9ae9cce04679a5e0f.txt'
     # dataset = load_dataset("mc4", "en", streaming=True, split="train")
     # ds = next(iter(dataset))
-    iterable_ds = load_sciencedb(txt=PATH, streaming=False)
+    # iterable_ds = load_sciencedb(txt=PATH, streaming=False)
     # iterable_ds._format_type = 'arrow'
     # data_dict = {key: [row[key] for row in iterable_ds] for key in iterable_ds.features}
 

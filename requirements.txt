@@ -1,5 +1,5 @@
 requests
-datasets
+datasets==3.0.1
 Pillow
 fsspec
 pyarrow
