@@ -5,13 +5,13 @@ from model import SciDataFrame
 
 from utils import TrainingTask, Level
 
-dataset_id = 'parser_test.txt'
+dataset_id = '3b0113781ced456dba2e3036cab6096c.txt'
 dataset_path = None
 is_analyze = False
 is_preprocess = False
-is_get_dataset_str = False
+is_get_dataset_str = True
 is_streaming = False
-task = TrainingTask.Recommendation
+task = TrainingTask.MultiLabelClassification
 batch_size = 1
 is_iterate = False
 kwargs = {
