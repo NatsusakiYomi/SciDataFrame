@@ -6,7 +6,7 @@ import datasets
 
 
 
-sys.path.append('C:\\Users\\Yomi\\PycharmProjects\\SDB2')
+# sys.path.append('C:\\Users\\Yomi\\PycharmProjects\\SDB2')
 
 from utils import Version, filter_url_from_index, Parser
 from utils.Parser import *
@@ -155,6 +155,7 @@ class MyFlightServer(fl.FlightServerBase):
         print(f"is self.dataset not None: {self.dataset is not None}")
 
         dataset = self.dataset
+        self.dataset=None
 
         def batch(ds: IterableDataset, batch_size: int, drop_last_batch: bool = False):
 
@@ -219,8 +220,8 @@ class MyFlightServer(fl.FlightServerBase):
         if dataset is not None:
             print(self.dataset_type)
             if self.dataset_type == 'num':
-                return is_iter_batch(self.nparray_to_table(self.dataset))
-            return is_iter_batch(self.dataset)
+                return is_iter_batch(self.nparray_to_table(dataset))
+            return is_iter_batch(dataset)
         dataset = load_scidb_dataset(
             self.dir_structure, dirs_string, streaming=not self.numerical_analysis and self.streaming)
         print(dataset)

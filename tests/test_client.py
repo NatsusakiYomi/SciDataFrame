@@ -1,6 +1,6 @@
 import sys
 
-sys.path.append('C:\\Users\\Yomi\\PycharmProjects\\SDB2')
+# sys.path.append('..')
 from model import SciDataFrame
 
 from utils import TrainingTask, Level
