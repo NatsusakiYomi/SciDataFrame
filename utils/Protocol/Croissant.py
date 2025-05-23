@@ -116,7 +116,7 @@ def scidataframe_to_croissant(dataset_id,schema,dir_structure):
 if __name__ == "__main__":
 
     from utils import TrainingTask, Level
-
+    from model import SciDataFrame
     dataset_id = 'export.json'
     dataset_path = None
     is_analyze = False

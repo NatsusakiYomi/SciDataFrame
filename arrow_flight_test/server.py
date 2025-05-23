@@ -6,15 +6,17 @@ class FlightServer(flight.FlightServerBase):
     def __init__(self, location):
         super().__init__(location)
         self.client_message = None
+        self.data_path="/mnt/output"
 
     def do_put(self, context, descriptor, reader, writer):
         # 接收客户端的 Arrow Table
         table = reader.read_all()
+        pa.parquet.write_table(table, self.dataset_path)
         print(f"Received table from client:\n{table}")
 
-        # 假设第一列的第一个单元格是用户的输入信息
-        self.client_message = table.column(0)[0].as_py()
-        print(f"Client message: {self.client_message}")
+        # # 假设第一列的第一个单元格是用户的输入信息
+        # self.client_message = table.column(0)[0].as_py()
+        # print(f"Client message: {self.client_message}")
 
     def do_get(self, context, ticket):
         # 根据客户端的输入生成一个新的 Arrow Table

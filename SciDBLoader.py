@@ -134,7 +134,7 @@ if __name__ == '__main__':
     # PATH = '91574142078b45c79d532d97b294ed44.txt'
     #
     # PATH = 'c0bd7f5c79a24e48849432629f59639f.txt'
-    PATH = 'parser_test.txt'
+    PATH = '8621e1b39c9a4acd87fee2be516d22ce.txt'
     # PATH = "new.txt"
     # PATH = "2gb.txt"
     # PATH = "8621e1b39c9a4acd87fee2be516d22ce.txt"

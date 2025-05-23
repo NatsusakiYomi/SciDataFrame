@@ -239,6 +239,7 @@ class MyFlightServer(fl.FlightServerBase):
         # print(urls_all,file_extensions)
         file_url = urls_all[0]
         file_format = file_extensions[0]
+        arrow_df=None
         # if file_format == "structured":
         #     arrow_df = StructuredParser.parse(self, file_url)
         if file_format == "csv":
