@@ -79,7 +79,7 @@
                 <configuration>
                     <archive>
                         <manifest>
-                            <mainClass>com.example.SparkCsvLoader</mainClass> <!-- 指定主类 -->
+                            <mainClass>com.example.SparkExecutorMapper</mainClass> <!-- 指定主类 -->
                         </manifest>
                     </archive>
                     <descriptorRefs>

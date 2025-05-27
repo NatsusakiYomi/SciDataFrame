@@ -1,0 +1,5 @@
+com\example\SparkCsvLoader.class
+com\example\SparkExecutorMapper.class
+com\example\SaveFileReader.class
+com\example\ArrowPartitionHandler.class
+com\example\RowToBinaryConverter.class
