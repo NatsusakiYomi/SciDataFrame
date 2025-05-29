@@ -1,12 +1,15 @@
 package com.example;
 
+import org.apache.arrow.memory.BufferAllocator;
 import org.apache.arrow.memory.RootAllocator;
 import org.apache.arrow.vector.*;
 import org.apache.arrow.vector.ipc.ArrowFileWriter;
-import org.apache.arrow.vector.ipc.ArrowStreamWriter;
 import org.apache.spark.sql.Row;
 import org.apache.arrow.vector.VectorSchemaRoot;
 import org.apache.arrow.vector.types.pojo.*;
+import org.apache.spark.sql.execution.arrow.ArrowWriter;
+import org.apache.spark.sql.types.StructType;
+import org.apache.spark.sql.util.ArrowUtils;
 
 import java.io.File;
 import java.io.FileOutputStream;
@@ -14,16 +17,18 @@ import java.io.IOException;
 import java.net.Socket;
 import java.net.UnknownHostException;
 import java.nio.channels.Channels;
-import java.io.ByteArrayOutputStream;
 import java.util.Collections;
 import java.util.Iterator;
 
-import java.util.ArrayList;
 import java.util.List;
 
 public class ArrowPartitionHandler {
 
     private static Socket socket;
+
+//    public ArrowPartitionHandler(){
+//
+//    }
 
     public static void processPartition(Iterator<Row> partitionIterator, int port) {
         // 收集分区内的所有行数据
@@ -104,6 +109,24 @@ public class ArrowPartitionHandler {
         // 使用Arrow Flight Client发送数据（示例需具体实现）
     }
 
+    public static void saveToLocal(int id, VectorSchemaRoot root) {
+        String fileName = String.format("/mnt/output/partition_%d.arrow", id);
+        File file = new File(fileName);
+
+        try (
+                FileOutputStream fileOutputStream = new FileOutputStream(file);
+                ArrowFileWriter writer = new ArrowFileWriter(root, null, fileOutputStream.getChannel())
+        ) {
+            writer.start();
+            writer.writeBatch();
+            writer.end();
+            root.close();
+            System.out.println("Record batches written: " + writer.getRecordBlocks().size() + ". Number of rows written: " + root.getRowCount());
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+
     public static void saveToLocal(byte[] bytes, int id){
         VectorSchemaRoot root = convertToArrowBinary(bytes);
         String fileName = String.format("/mnt/output/partition_%d.arrow", id);
@@ -120,6 +143,16 @@ public class ArrowPartitionHandler {
         } catch (IOException e) {
             e.printStackTrace();
         }
+    }
+
+
+
+    public static ArrowWriter convertToArrow(StructType schema, String timeZoneId){
+        Schema arrowSchema = ArrowUtils.toArrowSchema(schema,timeZoneId);
+        BufferAllocator allocator = ArrowUtils.rootAllocator().newChildAllocator("new",0,Long.MAX_VALUE);
+        VectorSchemaRoot root = VectorSchemaRoot.create(arrowSchema, allocator);
+//        VectorUnloader vectorUnloader = new VectorUnloader(root);
+        return ArrowWriter.create(root);
     }
 
 
